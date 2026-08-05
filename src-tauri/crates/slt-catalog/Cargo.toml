@@ -1,0 +1,13 @@
+[package]
+name = "slt-catalog"
+version = "0.1.0"
+edition = "2021"
+description = "Chassis catalog describing lamps and UDS action templates"
+
+[dependencies]
+slt-transport = { path = "../slt-transport" }
+slt-uds = { path = "../slt-uds" }
+serde = { workspace = true }
+toml = { workspace = true }
+tracing = { workspace = true }
+thiserror = { workspace = true }

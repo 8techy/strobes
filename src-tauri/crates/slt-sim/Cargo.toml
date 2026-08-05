@@ -1,0 +1,16 @@
+[package]
+name = "slt-sim"
+version = "0.1.0"
+edition = "2021"
+description = "Mock HSFZ and DoIP ECUs for developing without a vehicle"
+
+[dependencies]
+slt-transport = { path = "../slt-transport" }
+slt-uds = { path = "../slt-uds" }
+slt-catalog = { path = "../slt-catalog" }
+serde = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full"] }

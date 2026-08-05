@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "BMW exterior light show controller over ENET (HSFZ/DoIP)",
+  "description": "BMW Strobe Software for F and G series",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
