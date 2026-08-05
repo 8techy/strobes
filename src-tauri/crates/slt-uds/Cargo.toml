@@ -1,0 +1,12 @@
+[package]
+name = "slt-uds"
+version = "0.1.0"
+edition = "2021"
+description = "UDS (ISO 14229) client with BMW-specific helpers and safety guards"
+
+[dependencies]
+slt-transport = { path = "../slt-transport" }
+serde = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+thiserror = { workspace = true }

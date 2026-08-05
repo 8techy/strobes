@@ -240,10 +240,23 @@ impl HsfzConnection {
     /// Transparently absorbs the gateway acknowledgement frame that precedes
     /// every real response, and surfaces error control words as typed errors.
     pub async fn request(&mut self, target: u8, payload: &[u8]) -> Result<Vec<u8>> {
+        self.send(target, payload).await?;
+        self.receive(target).await
+    }
+
+    /// Sends a diagnostic frame without waiting for a response.
+    pub async fn send(&mut self, target: u8, payload: &[u8]) -> Result<()> {
         let frame = Frame::diagnostic(self.tester, target, payload.to_vec());
         self.stream.write_all(&frame.encode()).await?;
         self.stream.flush().await?;
+        Ok(())
+    }
 
+    /// Waits for the next diagnostic response from `target` without sending.
+    ///
+    /// Needed because UDS `responsePending` (NRC 0x78) requires reading further
+    /// responses for a request that was already transmitted.
+    pub async fn receive(&mut self, target: u8) -> Result<Vec<u8>> {
         loop {
             let frame = self.read_frame().await?;
 

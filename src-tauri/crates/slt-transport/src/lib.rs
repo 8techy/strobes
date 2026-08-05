@@ -125,6 +125,16 @@ impl Connection {
             Self::DoIp(c) => c.request(target.as_doip(), payload).await,
         }
     }
+
+    /// Waits for a further response to a request already sent.
+    ///
+    /// Used by the UDS layer when an ECU answers `responsePending`.
+    pub async fn receive(&mut self, target: EcuAddress) -> Result<Vec<u8>> {
+        match self {
+            Self::Hsfz(c) => c.receive(target.as_hsfz()).await,
+            Self::DoIp(c) => c.receive(target.as_doip()).await,
+        }
+    }
 }
 
 /// Well-known BMW ECU diagnostic addresses.
