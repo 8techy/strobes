@@ -63,10 +63,9 @@ pub struct SimulatedEcu {
     short_circuit_counters: HashMap<u8, u8>,
     dtcs: Vec<(u32, u8)>,
     pub conditions: Conditions,
-    /// Answer this many `responsePending` before the real response, to exercise
-    /// the client's 0x78 handling.
+    /// Emit this many `responsePending` frames before each real response, to
+    /// exercise the client's 0x78 handling.
     pub pending_responses: u32,
-    pending_remaining: u32,
 }
 
 impl SimulatedEcu {
@@ -83,7 +82,6 @@ impl SimulatedEcu {
             dtcs: Vec::new(),
             conditions: Conditions::default(),
             pending_responses: 0,
-            pending_remaining: 0,
         }
     }
 
@@ -130,14 +128,22 @@ impl SimulatedEcu {
         }
     }
 
-    /// Handles a UDS request, returning the response bytes.
-    pub fn handle(&mut self, request: &[u8]) -> Vec<u8> {
-        // Emit the configured run of responsePending answers first.
-        if self.pending_remaining > 0 {
-            self.pending_remaining -= 1;
-            return negative(request[0], Nrc::RESPONSE_PENDING);
-        }
+    /// Handles a request, returning every frame the ECU would send back.
+    ///
+    /// A real module answering `responsePending` sends the 0x78 frames and then
+    /// the final response, all unprompted, for a single request. Modelling that
+    /// as one call returning several frames is what makes the client's retry loop
+    /// testable; returning only the 0x78 would leave the client waiting forever.
+    pub fn handle_sequence(&mut self, request: &[u8]) -> Vec<Vec<u8>> {
+        let mut frames: Vec<Vec<u8>> = (0..self.pending_responses)
+            .map(|_| negative(request.first().copied().unwrap_or(0), Nrc::RESPONSE_PENDING))
+            .collect();
+        frames.push(self.handle(request));
+        frames
+    }
 
+    /// Handles a UDS request, returning the final response bytes.
+    pub fn handle(&mut self, request: &[u8]) -> Vec<u8> {
         let Some(&service) = request.first() else {
             return negative(0x00, Nrc::INCORRECT_MESSAGE_LENGTH);
         };
@@ -173,7 +179,6 @@ impl SimulatedEcu {
         }
         self.session = requested;
         self.session_started = Some(Instant::now());
-        self.pending_remaining = self.pending_responses;
         vec![
             sid::DIAGNOSTIC_SESSION_CONTROL + sid::POSITIVE_RESPONSE_OFFSET,
             requested,
@@ -512,11 +517,18 @@ mod tests {
     fn configured_pending_responses_precede_the_real_answer() {
         let mut ecu = fem();
         ecu.pending_responses = 2;
-        ecu.handle(&[0x10, 0x03]);
 
-        assert_eq!(ecu.handle(&[0x22, 0xF1, 0x90]), vec![0x7F, 0x22, 0x78]);
-        assert_eq!(ecu.handle(&[0x22, 0xF1, 0x90]), vec![0x7F, 0x22, 0x78]);
-        assert_eq!(ecu.handle(&[0x22, 0xF1, 0x90])[0], 0x62);
+        let frames = ecu.handle_sequence(&[0x22, 0xF1, 0x90]);
+        assert_eq!(frames.len(), 3);
+        assert_eq!(frames[0], vec![0x7F, 0x22, 0x78]);
+        assert_eq!(frames[1], vec![0x7F, 0x22, 0x78]);
+        assert_eq!(frames[2][0], 0x62);
+    }
+
+    #[test]
+    fn without_pending_configured_one_frame_comes_back() {
+        let mut ecu = fem();
+        assert_eq!(ecu.handle_sequence(&[0x22, 0xF1, 0x90]).len(), 1);
     }
 
     #[test]

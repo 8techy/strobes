@@ -1,0 +1,51 @@
+# Catalog for the built-in simulator.
+#
+# This is the only catalog shipped with verified = true, because the identifier
+# below is one the simulator itself defines rather than anything derived from a
+# real BMW. It exists so the whole application can be exercised end to end
+# without a car, and so there is a known-good example of the schema to copy.
+#
+# Start the simulator from the Connect screen, then load this catalog.
+
+schema_version = 1
+
+[chassis]
+id = "SIM"
+name = "Strobelight simulator"
+transport = "hsfz"
+notes = "Mock vehicle served by slt-sim. Not a real car; nothing here applies to one."
+
+[[ecu]]
+name = "FEM_BODY"
+address = 0x40
+info = "Simulated body controller"
+
+[[ecu]]
+name = "FEM_GW"
+address = 0x10
+info = "Simulated gateway"
+
+# Lamp control. 0xD0FF is the simulator's own invented identifier.
+[[action]]
+id = "lamp.set"
+ecu = "FEM_BODY"
+service = 0x2F
+identifier = 0xD0FF
+session = 0x03
+control_actuate = 0x03 # STA  / ShortTermAdjustment
+control_release = 0x00 # RCTECU / ReturnControlToECU
+min_dwell_ms = 20
+verified = true
+info = "Sets one lamp output to a brightness in the simulator."
+
+  [[action.param]]
+  name = "lamp"
+  datatype = "char"
+  info = "LAMPNR from the BMW lamp enumeration"
+
+  [[action.param]]
+  name = "level"
+  datatype = "char"
+  min = 0.0
+  max = 100.0
+  info = "Brightness percentage"

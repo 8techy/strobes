@@ -1,0 +1,19 @@
+[package]
+name = "slt-engine"
+version = "0.1.0"
+edition = "2021"
+description = "Timeline scheduler, safety supervisor and effect library"
+
+[dependencies]
+slt-transport = { path = "../slt-transport" }
+slt-uds = { path = "../slt-uds" }
+slt-catalog = { path = "../slt-catalog" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+slt-sim = { path = "../slt-sim" }
+tokio = { workspace = true, features = ["full"] }
