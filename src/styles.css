@@ -1,26 +1,79 @@
 @import "tailwindcss";
 
-/* Dark, high-contrast palette. This is used in a garage, often at night, and
-   frequently at arm's length from a laptop, so contrast matters more than
-   subtlety. */
+/*
+  OLED dark by default; soft grey-white via [data-theme="light"].
+  Corners stay sharp — this UI is meant to feel like a tool, not a consumer app.
+*/
+
 @theme {
-  --color-ink-950: #08090c;
-  --color-ink-900: #0d0f14;
-  --color-ink-850: #12151c;
-  --color-ink-800: #181c25;
-  --color-ink-700: #232834;
-  --color-ink-600: #333a4a;
-  --color-ink-400: #6b7688;
-  --color-ink-300: #9aa5b8;
-  --color-ink-100: #e6ebf4;
+  --color-ink-950: var(--surface-0);
+  --color-ink-900: var(--surface-1);
+  --color-ink-850: var(--surface-2);
+  --color-ink-800: var(--surface-3);
+  --color-ink-700: var(--surface-4);
+  --color-ink-600: var(--border-strong);
+  --color-ink-400: var(--text-muted);
+  --color-ink-300: var(--text-secondary);
+  --color-ink-100: var(--text-primary);
 
-  --color-beam-400: #56b6ff;
-  --color-beam-500: #2e9cf5;
-  --color-beam-600: #1a7fd4;
+  --color-beam-400: var(--accent-bright);
+  --color-beam-500: var(--accent);
+  --color-beam-600: var(--accent-deep);
 
-  --color-amber-glow: #ffb020;
-  --color-danger: #ff4d4f;
-  --color-safe: #3ddc84;
+  --color-amber-glow: var(--warn);
+  --color-danger: var(--danger);
+  --color-safe: var(--safe);
+}
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --surface-0: #000000;
+  --surface-1: #0a0a0a;
+  --surface-2: #111111;
+  --surface-3: #161616;
+  --surface-4: #222222;
+  --border-strong: #333333;
+
+  --text-primary: #f0f0f0;
+  --text-secondary: #a3a3a3;
+  --text-muted: #6b6b6b;
+
+  --accent: #d4d4d4;
+  --accent-bright: #ffffff;
+  --accent-deep: #9a9a9a;
+
+  --warn: #c9a227;
+  --danger: #e04545;
+  --safe: #3a9a62;
+
+  --logo-filter: invert(1);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --surface-0: #e8e8e6;
+  --surface-1: #f4f4f2;
+  --surface-2: #fafaf8;
+  --surface-3: #ffffff;
+  --surface-4: #dcdcd8;
+  --border-strong: #c4c4be;
+
+  --text-primary: #141414;
+  --text-secondary: #4a4a4a;
+  --text-muted: #7a7a7a;
+
+  --accent: #2a2a2a;
+  --accent-bright: #000000;
+  --accent-deep: #1a1a1a;
+
+  --warn: #9a7b1a;
+  --danger: #c23030;
+  --safe: #2a7a4e;
+
+  --logo-filter: none;
 }
 
 @layer base {
@@ -31,16 +84,17 @@
   }
 
   body {
-    background-color: var(--color-ink-950);
-    color: var(--color-ink-100);
+    background-color: var(--surface-0);
+    color: var(--text-primary);
     font-family:
-      ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      "Segoe UI",
+      ui-sans-serif,
+      system-ui,
+      sans-serif;
     -webkit-font-smoothing: antialiased;
     overflow: hidden;
   }
 
-  /* Hex values, byte strings and lamp codes read much better monospaced, and
-     they appear all over this application. */
   code,
   kbd,
   .mono {
@@ -49,31 +103,30 @@
   }
 
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: var(--color-ink-900);
+    background: var(--surface-1);
   }
   ::-webkit-scrollbar-thumb {
-    background: var(--color-ink-700);
-    border-radius: 5px;
+    background: var(--surface-4);
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-ink-600);
+    background: var(--border-strong);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-beam-400);
+    outline: 1px solid var(--accent-bright);
     outline-offset: 2px;
   }
 }
 
 @layer components {
   .card {
-    background-color: var(--color-ink-900);
-    border: 1px solid var(--color-ink-700);
-    border-radius: 0.75rem;
+    background-color: var(--surface-1);
+    border: 1px solid var(--surface-4);
+    border-radius: 0;
   }
 
   .btn {
@@ -81,109 +134,147 @@
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    border-radius: 0.5rem;
-    padding: 0.5rem 0.9rem;
-    font-size: 0.875rem;
+    border-radius: 0;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.8125rem;
     font-weight: 600;
+    letter-spacing: 0.02em;
     border: 1px solid transparent;
     cursor: pointer;
     transition:
-      background-color 120ms ease,
-      border-color 120ms ease,
-      opacity 120ms ease;
+      background-color 100ms ease,
+      border-color 100ms ease,
+      color 100ms ease,
+      opacity 100ms ease;
     white-space: nowrap;
   }
 
   .btn:disabled {
-    opacity: 0.45;
+    opacity: 0.4;
     cursor: not-allowed;
   }
 
   .btn-primary {
-    background-color: var(--color-beam-600);
-    color: white;
+    background-color: var(--text-primary);
+    color: var(--surface-0);
+    border-color: var(--text-primary);
   }
   .btn-primary:hover:not(:disabled) {
-    background-color: var(--color-beam-500);
+    background-color: transparent;
+    color: var(--text-primary);
   }
 
   .btn-ghost {
-    background-color: var(--color-ink-800);
-    border-color: var(--color-ink-700);
-    color: var(--color-ink-100);
+    background-color: transparent;
+    border-color: var(--surface-4);
+    color: var(--text-primary);
   }
   .btn-ghost:hover:not(:disabled) {
-    background-color: var(--color-ink-700);
+    background-color: var(--surface-3);
+    border-color: var(--border-strong);
   }
 
   .btn-danger {
-    background-color: var(--color-danger);
-    color: white;
+    background-color: var(--danger);
+    color: #fff;
+    border-color: var(--danger);
   }
   .btn-danger:hover:not(:disabled) {
-    filter: brightness(1.1);
+    filter: brightness(1.08);
   }
 
-  /* The panic control. Deliberately loud and never subtle: it needs to be
-     findable instantly by someone who is already worried. */
   .btn-panic {
-    background-color: var(--color-danger);
-    color: white;
+    background-color: var(--danger);
+    color: #fff;
+    border-color: var(--danger);
     font-weight: 800;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    box-shadow: 0 0 0 0 rgb(255 77 79 / 60%);
-    animation: panic-ready 2.4s ease-in-out infinite;
   }
-
-  @keyframes panic-ready {
-    0%,
-    100% {
-      box-shadow: 0 0 0 0 rgb(255 77 79 / 45%);
-    }
-    50% {
-      box-shadow: 0 0 0 6px rgb(255 77 79 / 0%);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .btn-panic {
-      animation: none;
-    }
+  .btn-panic:hover:not(:disabled) {
+    filter: brightness(1.08);
   }
 
   .label {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--color-ink-400);
+    color: var(--text-muted);
   }
 
   .pill {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    border-radius: 999px;
-    padding: 0.15rem 0.6rem;
+    border-radius: 0;
+    padding: 0.15rem 0.5rem;
     font-size: 0.7rem;
     font-weight: 600;
-    border: 1px solid var(--color-ink-600);
-    color: var(--color-ink-300);
+    border: 1px solid var(--border-strong);
+    color: var(--text-secondary);
   }
 
   .input {
-    background-color: var(--color-ink-850);
-    border: 1px solid var(--color-ink-700);
-    border-radius: 0.5rem;
+    background-color: var(--surface-2);
+    border: 1px solid var(--surface-4);
+    border-radius: 0;
     padding: 0.45rem 0.65rem;
     font-size: 0.875rem;
-    color: var(--color-ink-100);
+    color: var(--text-primary);
     width: 100%;
   }
 
   .input:focus {
-    border-color: var(--color-beam-500);
+    border-color: var(--accent);
     outline: none;
+  }
+
+  .brand-logo {
+    height: 1.35rem;
+    width: auto;
+    display: block;
+    filter: var(--logo-filter);
+  }
+
+  .theme-toggle {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 40;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--surface-4);
+    background: var(--surface-1);
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.45rem 0.7rem;
+    cursor: pointer;
+  }
+  .theme-toggle:hover {
+    color: var(--text-primary);
+    border-color: var(--border-strong);
+  }
+
+  .nav-link {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 2px solid transparent;
+    transition:
+      color 100ms ease,
+      border-color 100ms ease;
+  }
+  .nav-link:hover {
+    color: var(--text-primary);
+  }
+  .nav-link-active {
+    color: var(--text-primary);
+    border-bottom-color: var(--text-primary);
   }
 }

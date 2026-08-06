@@ -26,11 +26,11 @@ function CounterBar({ counter }: { counter: number }) {
   return (
     <div className="flex items-center gap-2">
       <div
-        className="h-1.5 w-24 overflow-hidden rounded-full"
+        className="h-1.5 w-24 overflow-hidden"
         style={{ backgroundColor: "var(--color-ink-700)" }}
       >
         <div
-          className="h-full rounded-full"
+          className="h-full"
           style={{ width: `${fraction * 100}%`, backgroundColor: colour }}
         />
       </div>
@@ -85,7 +85,7 @@ export function Safety() {
           >
             <span
               aria-hidden
-              className="size-3 rounded-full"
+              className="size-3"
               style={{
                 backgroundColor: preflight.passed
                   ? "var(--color-safe)"
@@ -141,7 +141,7 @@ export function Safety() {
                 {preflight.degraded_lamps.map((lamp) => (
                   <div
                     key={lamp.lamp}
-                    className="flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm"
+                    className="flex items-center gap-3 px-3 py-1.5 text-sm"
                     style={{ backgroundColor: "var(--color-ink-850)" }}
                   >
                     <span className="flex-1">{lamp.name}</span>

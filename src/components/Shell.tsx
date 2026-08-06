@@ -10,6 +10,12 @@ import { useEffect, useState } from "react";
 
 import * as api from "../api";
 import { useStore } from "../store";
+import {
+  applyTheme,
+  getStoredTheme,
+  toggleTheme,
+  type Theme,
+} from "../theme";
 
 const NAV = [
   { to: "/", label: "Connect", hint: "Find and connect to a vehicle" },
@@ -89,7 +95,7 @@ function PanicButton() {
       disabled={busy || !engineReady}
       title="Immediately hand every light back to the car"
     >
-      {busy ? "Stopping" : "Panic stop"}
+      {busy ? "Stopping" : "Panic"}
     </button>
   );
 }
@@ -103,7 +109,7 @@ function ErrorBanner() {
     <div
       className="flex items-start gap-3 px-4 py-2 text-sm"
       style={{
-        backgroundColor: "rgb(255 77 79 / 12%)",
+        backgroundColor: "color-mix(in srgb, var(--color-danger) 14%, transparent)",
         borderBottom: "1px solid var(--color-danger)",
       }}
     >
@@ -112,6 +118,33 @@ function ErrorBanner() {
         Dismiss
       </button>
     </div>
+  );
+}
+
+function ThemeToggle() {
+  const [theme, setTheme] = useState<Theme>(() => getStoredTheme());
+
+  useEffect(() => {
+    applyTheme(theme);
+  }, [theme]);
+
+  return (
+    <button
+      type="button"
+      className="theme-toggle"
+      onClick={() => setTheme((current) => toggleTheme(current))}
+      title={
+        theme === "dark"
+          ? "Switch to soft light theme"
+          : "Switch to OLED dark theme"
+      }
+      aria-label={
+        theme === "dark" ? "Switch to light theme" : "Switch to dark theme"
+      }
+    >
+      <span aria-hidden>{theme === "dark" ? "○" : "●"}</span>
+      {theme === "dark" ? "Light" : "Dark"}
+    </button>
   );
 }
 
@@ -174,15 +207,18 @@ export function Shell() {
   return (
     <div className="flex h-full flex-col">
       <header
-        className="flex items-center gap-4 px-4 py-3"
+        className="flex items-center gap-5 px-4 py-3"
         style={{ borderBottom: "1px solid var(--color-ink-700)" }}
       >
-        <div className="flex items-baseline gap-2">
-          <span className="text-lg font-extrabold tracking-tight">Strobelight</span>
-          <span className="label">BMW ENET</span>
-        </div>
+        <NavLink to="/" className="shrink-0" title="Strobes">
+          <img
+            src="/strobes-logo.png"
+            alt="Strobes"
+            className="brand-logo"
+          />
+        </NavLink>
 
-        <nav className="ml-4 flex flex-1 items-center gap-1">
+        <nav className="flex flex-1 items-center gap-0.5 overflow-x-auto">
           {NAV.map((item) => (
             <NavLink
               key={item.to}
@@ -190,11 +226,7 @@ export function Shell() {
               title={item.hint}
               end={item.to === "/"}
               className={({ isActive }) =>
-                `rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors ${
-                  isActive
-                    ? "bg-[var(--color-ink-700)] text-[var(--color-ink-100)]"
-                    : "text-[var(--color-ink-300)] hover:bg-[var(--color-ink-800)]"
-                }`
+                `nav-link ${isActive ? "nav-link-active" : ""}`
               }
             >
               {item.label}
@@ -211,9 +243,11 @@ export function Shell() {
 
       <ErrorBanner />
 
-      <main className="flex-1 overflow-auto p-5">
+      <main className="flex-1 overflow-auto p-5 pb-14">
         <Outlet />
       </main>
+
+      <ThemeToggle />
     </div>
   );
 }

@@ -91,11 +91,11 @@ function BeatSync() {
       </p>
       <div className="flex items-center gap-3">
         <div
-          className="h-2 flex-1 overflow-hidden rounded-full"
+          className="h-2 flex-1 overflow-hidden"
           style={{ backgroundColor: "var(--color-ink-700)" }}
         >
           <div
-            className="h-full rounded-full"
+            className="h-full"
             style={{
               width: `${level * 100}%`,
               backgroundColor: "var(--color-beam-400)",

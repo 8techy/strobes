@@ -9,7 +9,10 @@ import { Effects } from "./routes/Effects";
 import { Editor } from "./routes/Editor";
 import { Lab } from "./routes/Lab";
 import { Safety } from "./routes/Safety";
+import { applyTheme, getStoredTheme } from "./theme";
 import "./styles.css";
+
+applyTheme(getStoredTheme());
 
 const router = createBrowserRouter([
   {

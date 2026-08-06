@@ -45,12 +45,12 @@ function EcuTable() {
           {ecus.map((ecu) => (
             <div
               key={ecu.address}
-              className="flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm"
+              className="flex items-center gap-3 px-3 py-1.5 text-sm"
               style={{ backgroundColor: "var(--color-ink-850)" }}
             >
               <span
                 aria-hidden
-                className="size-2 shrink-0 rounded-full"
+                className="size-2 shrink-0"
                 style={{
                   backgroundColor: ecu.present
                     ? "var(--color-safe)"
@@ -121,7 +121,7 @@ function DtcPanel() {
           {dtcs.map((dtc) => (
             <div
               key={dtc.code}
-              className="flex items-center gap-3 rounded-lg px-3 py-1.5 text-sm"
+              className="flex items-center gap-3 px-3 py-1.5 text-sm"
               style={{ backgroundColor: "var(--color-ink-850)" }}
             >
               <span className="mono w-24 shrink-0 font-semibold">{dtc.code_hex}</span>

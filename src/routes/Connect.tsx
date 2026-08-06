@@ -135,7 +135,7 @@ function CatalogPicker() {
             <button
               key={catalog.path}
               onClick={() => void chooseCatalog(catalog.path)}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors"
+              className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors"
               style={{
                 backgroundColor: active
                   ? "var(--color-ink-700)"
@@ -223,7 +223,7 @@ export function Connect() {
               {found.map((item) => (
                 <div
                   key={`${item.ip}:${item.port}`}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2"
+                  className="flex items-center gap-3 px-3 py-2"
                   style={{
                     backgroundColor: "var(--color-ink-850)",
                     border: "1px solid var(--color-ink-700)",

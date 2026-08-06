@@ -70,7 +70,7 @@ export function LampGrid({
                       ? "The car has recorded faults for this output, so Strobelight will not drive it."
                       : `${lamp.code} · ${lamp.idHex}`
                   }
-                  className="relative overflow-hidden rounded-lg px-3 py-2 text-left transition-colors"
+                  className="relative overflow-hidden px-3 py-2 text-left transition-colors"
                   style={{
                     backgroundColor: "var(--color-ink-850)",
                     border: `1px solid ${

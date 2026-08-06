@@ -188,7 +188,7 @@ export function Editor() {
             {steps.map((step, index) => (
               <div
                 key={index}
-                className="rounded-lg p-2"
+                className="p-2"
                 style={{
                   backgroundColor:
                     index === activeStep
