@@ -15,6 +15,7 @@ const RENDERABLE_STEP_MS = 20;
 
 function BeatSync() {
   const detector = useRef<BeatDetector | null>(null);
+  const beatErrorReported = useRef(false);
   const [active, setActive] = useState(false);
   const [level, setLevel] = useState(0);
   const [bpm, setBpm] = useState<number | null>(null);
@@ -32,6 +33,7 @@ function BeatSync() {
     if (active) {
       detector.current?.stop();
       detector.current = null;
+      beatErrorReported.current = false;
       setActive(false);
       setLevel(0);
       setBpm(null);
@@ -47,7 +49,15 @@ function BeatSync() {
       const instance = new BeatDetector({
         onBeat: (detected) => {
           setBpm(detected > 0 ? detected : null);
-          void api.submitBeat(detected);
+          void api.submitBeat(detected).catch((e) => {
+            if (beatErrorReported.current) return;
+            beatErrorReported.current = true;
+            setError(
+              e instanceof Error
+                ? `Beat sync failed: ${e.message}`
+                : String(e),
+            );
+          });
         },
         onLevel: setLevel,
       });
