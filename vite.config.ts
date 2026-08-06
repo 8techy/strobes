@@ -17,8 +17,12 @@ export default defineConfig({
   },
   envPrefix: ["VITE_", "TAURI_"],
   build: {
+    // Tauri ships a fixed WebView2/WebKit version, so there is no need to
+    // transpile for older browsers.
     target: "chrome110",
     sourcemap: !!process.env.TAURI_ENV_DEBUG,
-    minify: process.env.TAURI_ENV_DEBUG ? false : "esbuild",
+    // Left as a boolean so Vite picks its default minifier; naming esbuild
+    // explicitly would require installing it separately.
+    minify: !process.env.TAURI_ENV_DEBUG,
   },
 });
