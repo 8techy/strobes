@@ -120,6 +120,7 @@ export function Shell() {
   const refreshEngine = useStore((s) => s.refreshEngine);
   const applyLampVisual = useStore((s) => s.applyLampVisual);
   const clearLampVisuals = useStore((s) => s.clearLampVisuals);
+  const setError = useStore((s) => s.setError);
 
   // Poll status rather than pushing it: it changes rarely and a poll keeps the
   // UI correct even if an event is missed during a reconnect.
@@ -136,19 +137,39 @@ export function Shell() {
   // Mirror engine steps onto the on-screen car so the preview matches reality.
   useEffect(() => {
     let unlisten: (() => void) | undefined;
-    void api.onEngineEvent((event) => {
-      if (event.type === "step") {
-        for (const command of event.commands) {
-          applyLampVisual(command.lamp, command.level);
+    let cancelled = false;
+
+    void api
+      .onEngineEvent((event) => {
+        if (event.type === "step") {
+          for (const command of event.commands) {
+            applyLampVisual(command.lamp, command.level);
+          }
+        } else if (event.type === "released" || event.type === "stopped") {
+          clearLampVisuals();
         }
-      } else if (event.type === "released" || event.type === "stopped") {
-        clearLampVisuals();
-      }
-    }).then((fn) => {
-      unlisten = fn;
-    });
-    return () => unlisten?.();
-  }, [applyLampVisual, clearLampVisuals]);
+      })
+      .then((fn) => {
+        if (cancelled) {
+          fn();
+          return;
+        }
+        unlisten = fn;
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        setError(
+          e instanceof Error
+            ? `Could not subscribe to engine events: ${e.message}`
+            : String(e),
+        );
+      });
+
+    return () => {
+      cancelled = true;
+      unlisten?.();
+    };
+  }, [applyLampVisual, clearLampVisuals, setError]);
 
   return (
     <div className="flex h-full flex-col">

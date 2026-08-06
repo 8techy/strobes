@@ -83,7 +83,11 @@ export function Editor() {
   function removeStep(index: number) {
     if (steps.length <= 1) return;
     setSteps((previous) => previous.filter((_, i) => i !== index));
-    setActiveStep((prev) => Math.max(0, Math.min(prev, steps.length - 2)));
+    setActiveStep((prev) => {
+      if (prev > index) return prev - 1;
+      if (prev === index) return Math.min(index, steps.length - 2);
+      return prev;
+    });
   }
 
   function build(): Effect {
