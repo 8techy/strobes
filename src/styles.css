@@ -36,7 +36,7 @@
   --surface-4: #222222;
   --border-strong: #333333;
 
-  --text-primary: #f0f0f0;
+  --text-primary: #ffffff;
   --text-secondary: #a3a3a3;
   --text-muted: #6b6b6b;
 
@@ -47,21 +47,20 @@
   --warn: #c9a227;
   --danger: #e04545;
   --safe: #3a9a62;
-
-  --logo-filter: invert(1);
 }
 
 [data-theme="light"] {
   color-scheme: light;
 
-  --surface-0: #e8e8e6;
-  --surface-1: #f4f4f2;
-  --surface-2: #fafaf8;
+  /* Soft grey shell; pure #ffffff from the light logo for raised surfaces. */
+  --surface-0: #ececec;
+  --surface-1: #f5f5f5;
+  --surface-2: #fafafa;
   --surface-3: #ffffff;
-  --surface-4: #dcdcd8;
-  --border-strong: #c4c4be;
+  --surface-4: #d8d8d8;
+  --border-strong: #c0c0c0;
 
-  --text-primary: #141414;
+  --text-primary: #000000;
   --text-secondary: #4a4a4a;
   --text-muted: #7a7a7a;
 
@@ -72,8 +71,6 @@
   --warn: #9a7b1a;
   --danger: #c23030;
   --safe: #2a7a4e;
-
-  --logo-filter: none;
 }
 
 @layer base {
@@ -231,10 +228,14 @@
   }
 
   .brand-logo {
-    height: 1.35rem;
+    height: 1.4rem;
     width: auto;
     display: block;
-    filter: var(--logo-filter);
+  }
+
+  [data-theme="dark"] .light-only,
+  [data-theme="light"] .dark-only {
+    display: none;
   }
 
   .theme-toggle {
@@ -244,20 +245,73 @@
     z-index: 40;
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
     border: 1px solid var(--surface-4);
     background: var(--surface-1);
-    color: var(--text-secondary);
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 0.45rem 0.7rem;
+    color: var(--text-primary);
+    padding: 0;
     cursor: pointer;
   }
   .theme-toggle:hover {
-    color: var(--text-primary);
     border-color: var(--border-strong);
+    background: var(--surface-3);
+  }
+
+  .theme-toggle-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    overflow: visible;
+  }
+
+  .theme-toggle-icon .sun-core,
+  .theme-toggle-icon .sun-ray,
+  .theme-toggle-icon .moon {
+    transform-origin: center;
+    transition:
+      transform 420ms cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 280ms ease,
+      stroke 280ms ease,
+      fill 280ms ease;
+  }
+
+  /* Dark theme shows the sun (click to go light). */
+  [data-theme="dark"] .theme-toggle-icon .sun-core {
+    transform: scale(1);
+    opacity: 1;
+    fill: currentColor;
+  }
+  [data-theme="dark"] .theme-toggle-icon .sun-ray {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  [data-theme="dark"] .theme-toggle-icon .moon {
+    transform: translateX(10px) rotate(30deg) scale(0.4);
+    opacity: 0;
+  }
+
+  /* Light theme shows the moon (click to go dark). */
+  [data-theme="light"] .theme-toggle-icon .sun-core {
+    transform: scale(0.45);
+    opacity: 0;
+  }
+  [data-theme="light"] .theme-toggle-icon .sun-ray {
+    opacity: 0;
+    transform: scale(0.5) rotate(-45deg);
+  }
+  [data-theme="light"] .theme-toggle-icon .moon {
+    transform: translateX(0) rotate(0deg) scale(1);
+    opacity: 1;
+    fill: currentColor;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .theme-toggle-icon .sun-core,
+    .theme-toggle-icon .sun-ray,
+    .theme-toggle-icon .moon {
+      transition: none;
+    }
   }
 
   .nav-link {

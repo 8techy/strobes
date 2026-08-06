@@ -2,7 +2,7 @@
 #
 # Every identifier below is a PLACEHOLDER. This file will not make any light
 # turn on until you replace them with values read from your own vehicle, which is
-# why every action is marked verified = false. Strobelight refuses to transmit
+# why every action is marked verified = false. Strobes refuses to transmit
 # unverified actions unless research mode is explicitly enabled.
 #
 # To fill this in, see docs/protocol-research.md section 6. The short version:

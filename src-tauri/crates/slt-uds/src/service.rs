@@ -40,7 +40,7 @@ pub mod sid {
 pub enum Session {
     /// Normal operation.
     Default = 0x01,
-    /// Precursor to flashing. Strobelight refuses to enter this.
+    /// Precursor to flashing. Strobes refuses to enter this.
     Programming = 0x02,
     /// Required for actuation. Reverts automatically on timeout.
     Extended = 0x03,
@@ -209,7 +209,7 @@ impl Nrc {
             0x22 => "Conditions are not right. Check that the ignition is on, the engine is off, and the car is stationary.",
             0x24 => "Operations arrived out of order, for example a stop before a start.",
             0x31 => "This module has no such identifier.",
-            0x33 => "The module requires a security unlock that Strobelight does not perform.",
+            0x33 => "The module requires a security unlock that Strobes does not perform.",
             0x78 => "The module needs more time and will answer shortly.",
             0x7E | 0x7F => "An extended diagnostic session is required for this operation.",
             0x83 => "The engine is running. Switch the ignition on but leave the engine off.",

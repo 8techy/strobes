@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "strobes",
+  "productName": "Strobes",
   "version": "0.1.0",
   "identifier": "com.strobes.app",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "strobes",
+        "title": "Strobes",
         "width": 1280,
         "height": 860,
         "minWidth": 1024,

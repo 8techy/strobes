@@ -6,7 +6,7 @@
 //! defines the mapping, including the scaling and byte-order fields that a naive
 //! "just send this byte" design would get wrong.
 //!
-//! Strobelight ships **no** BMW-derived identifiers. Catalog files are authored
+//! Strobes ships **no** BMW-derived identifiers. Catalog files are authored
 //! by users from software they license. Entries whose identifiers have not been
 //! verified on a real vehicle are marked `verified = false` and the engine
 //! refuses to transmit them unless research mode is explicitly enabled.

@@ -1,6 +1,6 @@
 # Catalogs
 
-A catalog tells Strobelight how to turn "switch on the left headlight ring" into
+A catalog tells Strobes how to turn "switch on the left headlight ring" into
 the exact UDS bytes your car expects. Everything vehicle-specific lives here, so
 adding support for a chassis means writing a TOML file rather than changing code.
 
@@ -12,7 +12,7 @@ across `FEM_20`, `BDC`, `BDC_G05` and `BDC_G11`.
 
 What is not public is the **data identifier** that controls a lamp. That lives in
 the `SG_Funktionen` table inside proprietary SGBD `.PRG` files shipped with ISTA
-and E-Sys. It is BMW copyright and cannot be redistributed, so Strobelight ships
+and E-Sys. It is BMW copyright and cannot be redistributed, so Strobes ships
 none of it. `f-series.toml` and `g-series.toml` are templates with placeholder
 identifiers and `verified = false`, and the safety supervisor refuses to transmit
 an unverified action unless you explicitly turn on research mode.
@@ -92,7 +92,7 @@ available = ["TFL_L", "TFL_R"]   # omit or leave empty to offer every lamp
 
 ### Request byte order
 
-The two services lay their bytes out differently, and Strobelight builds each
+The two services lay their bytes out differently, and Strobes builds each
 correctly from `service`:
 
 - `0x2F`: `2F <identifier_hi> <identifier_lo> <control> <params...>`

@@ -6,7 +6,7 @@
 #
 # G-series differs from F-series in two ways that matter here:
 #   - The transport is DoIP (TCP 13400) rather than HSFZ (TCP 6801), and DoIP
-#     requires a routing activation handshake. Strobelight handles that when the
+#     requires a routing activation handshake. Strobes handles that when the
 #     transport is set to "doip" below.
 #   - The BDC covers rear lighting too, so the rear lamps are available here
 #     where the F-series template omits them.

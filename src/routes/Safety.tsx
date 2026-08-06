@@ -188,7 +188,7 @@ export function Safety() {
 
       <div className="card p-4 text-sm leading-relaxed text-[var(--color-ink-300)]">
         <h3 className="mb-2 font-semibold text-[var(--color-ink-100)]">
-          What Strobelight will not do
+          What Strobes will not do
         </h3>
         <ul className="space-y-1.5">
           <li>

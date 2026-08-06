@@ -534,7 +534,7 @@ impl Runner {
         }
         if self.supervisor.degraded_lamp_ids().contains(&lamp) {
             return Err(EngineError::InvalidEffect(format!(
-                "the car has recorded faults for lamp 0x{lamp:02X}; Strobelight will not drive it"
+                "the car has recorded faults for lamp 0x{lamp:02X}; Strobes will not drive it"
             )));
         }
         self.supervisor.check_dwell(lamp)?;

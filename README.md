@@ -42,7 +42,8 @@ AppImage on Linux, in `src-tauri/target/release/bundle/`.
 
 ### Regenerate the app icon
 
-The icon is produced by a script rather than committed as opaque binary:
+Brand marks live in `public/`. Sync the dark icon into Tauri's source slot, then
+expand it to every platform size:
 
 ```bash
 node scripts/generate-icon.mjs

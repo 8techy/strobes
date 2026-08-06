@@ -1,4 +1,4 @@
-//! Strobelight application library.
+//! Strobes application library.
 //!
 //! The Tauri shell is deliberately thin: it owns process lifetime and the IPC
 //! surface, and delegates everything else to the `slt-*` crates so the domain
@@ -50,5 +50,5 @@ pub fn run() {
             ipc::simulator_status,
         ])
         .run(tauri::generate_context!())
-        .expect("failed to start Strobelight");
+        .expect("failed to start Strobes");
 }

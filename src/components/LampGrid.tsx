@@ -67,7 +67,7 @@ export function LampGrid({
                   onClick={() => onPick?.(lamp)}
                   title={
                     isDegraded
-                      ? "The car has recorded faults for this output, so Strobelight will not drive it."
+                      ? "The car has recorded faults for this output, so Strobes will not drive it."
                       : `${lamp.code} · ${lamp.idHex}`
                   }
                   className="relative overflow-hidden px-3 py-2 text-left transition-colors"

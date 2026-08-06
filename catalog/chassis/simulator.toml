@@ -11,7 +11,7 @@ schema_version = 1
 
 [chassis]
 id = "SIM"
-name = "Strobelight simulator"
+name = "Strobes simulator"
 transport = "hsfz"
 notes = "Mock vehicle served by slt-sim. Not a real car; nothing here applies to one."
 

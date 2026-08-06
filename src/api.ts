@@ -36,7 +36,7 @@ export const isDesktop = "__TAURI_INTERNALS__" in window;
 async function call<T>(command: string, args?: Record<string, unknown>): Promise<T> {
   if (!isDesktop) {
     throw new Error(
-      "This needs the Strobelight desktop app. A browser cannot open the raw network sockets an ENET connection requires.",
+      "This needs the Strobes desktop app. A browser cannot open the raw network sockets an ENET connection requires.",
     );
   }
   return invoke<T>(command, args);

@@ -2,7 +2,7 @@
 //!
 //! The engine deals in "lamp 0x30 at 100%"; this translates that into the exact
 //! bytes the connected car expects, which is entirely catalog-driven because the
-//! identifiers differ per chassis and are not something Strobelight can ship.
+//! identifiers differ per chassis and are not something Strobes can ship.
 
 use std::collections::HashMap;
 use std::sync::Arc;

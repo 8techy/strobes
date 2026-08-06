@@ -135,15 +135,40 @@ function ThemeToggle() {
       onClick={() => setTheme((current) => toggleTheme(current))}
       title={
         theme === "dark"
-          ? "Switch to soft light theme"
+          ? "Switch to light theme"
           : "Switch to OLED dark theme"
       }
       aria-label={
         theme === "dark" ? "Switch to light theme" : "Switch to dark theme"
       }
     >
-      <span aria-hidden>{theme === "dark" ? "○" : "●"}</span>
-      {theme === "dark" ? "Light" : "Dark"}
+      <svg
+        className="theme-toggle-icon"
+        viewBox="0 0 24 24"
+        aria-hidden
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+      >
+        <circle className="sun-core" cx="12" cy="12" r="4" />
+        <g className="sun-ray">
+          <path d="M12 2v2.5" />
+          <path d="M12 19.5V22" />
+          <path d="M2 12h2.5" />
+          <path d="M19.5 12H22" />
+          <path d="M4.6 4.6l1.8 1.8" />
+          <path d="M17.6 17.6l1.8 1.8" />
+          <path d="M17.6 4.6l-1.8 1.8" />
+          <path d="M6.4 17.6l-1.8 1.8" />
+        </g>
+        <path
+          className="moon"
+          d="M19.5 13.2A7.2 7.2 0 1 1 10.8 4.5 5.6 5.6 0 0 0 19.5 13.2z"
+          stroke="none"
+        />
+      </svg>
     </button>
   );
 }
@@ -212,9 +237,14 @@ export function Shell() {
       >
         <NavLink to="/" className="shrink-0" title="Strobes">
           <img
-            src="/strobes-logo.png"
+            src="/logo-nav-dark.png"
             alt="Strobes"
-            className="brand-logo"
+            className="brand-logo dark-only"
+          />
+          <img
+            src="/logo-nav-light.png"
+            alt="Strobes"
+            className="brand-logo light-only"
           />
         </NavLink>
 

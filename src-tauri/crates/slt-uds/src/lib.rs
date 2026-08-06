@@ -110,7 +110,7 @@ impl SafetyGuard {
             // self-healing the way an actuation is.
             sid::WRITE_DATA_BY_IDENTIFIER if !self.allow_persistent_writes => {
                 Err(UdsError::Blocked(
-                    "refusing WriteDataByIdentifier: Strobelight never makes persistent changes"
+                    "refusing WriteDataByIdentifier: Strobes never makes persistent changes"
                         .into(),
                 ))
             }
