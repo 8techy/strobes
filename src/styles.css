@@ -1,0 +1,189 @@
+@import "tailwindcss";
+
+/* Dark, high-contrast palette. This is used in a garage, often at night, and
+   frequently at arm's length from a laptop, so contrast matters more than
+   subtlety. */
+@theme {
+  --color-ink-950: #08090c;
+  --color-ink-900: #0d0f14;
+  --color-ink-850: #12151c;
+  --color-ink-800: #181c25;
+  --color-ink-700: #232834;
+  --color-ink-600: #333a4a;
+  --color-ink-400: #6b7688;
+  --color-ink-300: #9aa5b8;
+  --color-ink-100: #e6ebf4;
+
+  --color-beam-400: #56b6ff;
+  --color-beam-500: #2e9cf5;
+  --color-beam-600: #1a7fd4;
+
+  --color-amber-glow: #ffb020;
+  --color-danger: #ff4d4f;
+  --color-safe: #3ddc84;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--color-ink-950);
+    color: var(--color-ink-100);
+    font-family:
+      ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  /* Hex values, byte strings and lamp codes read much better monospaced, and
+     they appear all over this application. */
+  code,
+  kbd,
+  .mono {
+    font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
+    font-variant-ligatures: none;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-ink-900);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-ink-700);
+    border-radius: 5px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-ink-600);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-beam-400);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .card {
+    background-color: var(--color-ink-900);
+    border: 1px solid var(--color-ink-700);
+    border-radius: 0.75rem;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition:
+      background-color 120ms ease,
+      border-color 120ms ease,
+      opacity 120ms ease;
+    white-space: nowrap;
+  }
+
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background-color: var(--color-beam-600);
+    color: white;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--color-beam-500);
+  }
+
+  .btn-ghost {
+    background-color: var(--color-ink-800);
+    border-color: var(--color-ink-700);
+    color: var(--color-ink-100);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background-color: var(--color-ink-700);
+  }
+
+  .btn-danger {
+    background-color: var(--color-danger);
+    color: white;
+  }
+  .btn-danger:hover:not(:disabled) {
+    filter: brightness(1.1);
+  }
+
+  /* The panic control. Deliberately loud and never subtle: it needs to be
+     findable instantly by someone who is already worried. */
+  .btn-panic {
+    background-color: var(--color-danger);
+    color: white;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    box-shadow: 0 0 0 0 rgb(255 77 79 / 60%);
+    animation: panic-ready 2.4s ease-in-out infinite;
+  }
+
+  @keyframes panic-ready {
+    0%,
+    100% {
+      box-shadow: 0 0 0 0 rgb(255 77 79 / 45%);
+    }
+    50% {
+      box-shadow: 0 0 0 6px rgb(255 77 79 / 0%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn-panic {
+      animation: none;
+    }
+  }
+
+  .label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-ink-400);
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 999px;
+    padding: 0.15rem 0.6rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border: 1px solid var(--color-ink-600);
+    color: var(--color-ink-300);
+  }
+
+  .input {
+    background-color: var(--color-ink-850);
+    border: 1px solid var(--color-ink-700);
+    border-radius: 0.5rem;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.875rem;
+    color: var(--color-ink-100);
+    width: 100%;
+  }
+
+  .input:focus {
+    border-color: var(--color-beam-500);
+    outline: none;
+  }
+}

@@ -1,0 +1,121 @@
+# TEMPLATE — BMW F-series (F20-F87), HSFZ over ENET.
+#
+# Every identifier below is a PLACEHOLDER. This file will not make any light
+# turn on until you replace them with values read from your own vehicle, which is
+# why every action is marked verified = false. Strobelight refuses to transmit
+# unverified actions unless research mode is explicitly enabled.
+#
+# To fill this in, see docs/protocol-research.md section 6. The short version:
+#
+#   1. Open FEM_20.PRG in Tool32 and show the SG_Funktionen table via the
+#      Tabellen-Info window. This needs no connection to the car.
+#   2. Find the rows whose INFO mentions lighting and whose SERVICE is 2F or 31.
+#   3. Copy the ID column value into `identifier` below.
+#   4. Copy the ARG_TABELLE parameter definitions into the [[action.param]]
+#      blocks, preserving DATENTYP, L/H, MUL, DIV and ADD.
+#   5. Set verified = true only once you have confirmed it on your own car.
+#
+# The lamp numbering itself is already correct and needs no research: it comes
+# from the published LAMPNRTEXTE table.
+
+schema_version = 1
+
+[chassis]
+id = "F3x"
+name = "BMW F-series (F20-F87)"
+transport = "hsfz"
+notes = "TEMPLATE: identifiers are placeholders. Fill them in from FEM_20.PRG before use."
+
+[[ecu]]
+name = "FEM_BODY"
+address = 0x40
+info = "Front Electronics Module / Body Domain Controller. Owns exterior lighting."
+
+[[ecu]]
+name = "FEM_GW"
+address = 0x10
+info = "Gateway. Present on every car, useful as a connectivity probe."
+
+[[ecu]]
+name = "REM"
+address = 0x72
+info = "Rear Electronics Module. Owns rear lighting on F-series."
+
+[[ecu]]
+name = "TMS_L"
+address = 0x41
+info = "LED headlight secondary module, left"
+
+[[ecu]]
+name = "TMS_R"
+address = 0x42
+info = "LED headlight secondary module, right"
+
+# --- Lamp control -----------------------------------------------------------
+# Expected shape once filled in: 2F <identifier> 03 <lamp> <level>
+[[action]]
+id = "lamp.set"
+ecu = "FEM_BODY"
+service = 0x2F
+identifier = 0x0000 # PLACEHOLDER
+session = 0x03
+control_actuate = 0x03 # STA
+control_release = 0x00 # RCTECU
+# 40 ms is conservative. The LIN bus to the TMS/LHM modules updates on the order
+# of tens of milliseconds, and faster switching risks tripping lamp monitoring.
+min_dwell_ms = 40
+verified = false
+info = "PLACEHOLDER. Replace identifier with the lighting control DID from SG_Funktionen."
+
+  [[action.param]]
+  name = "lamp"
+  datatype = "char"
+  info = "LAMPNR from LAMPNRTEXTE"
+
+  [[action.param]]
+  name = "level"
+  datatype = "char"
+  min = 0.0
+  max = 100.0
+  info = "Brightness percentage. Remove this parameter if your module is on/off only."
+
+# --- Short-circuit counters -------------------------------------------------
+# Optional but strongly recommended: it is what lets the preflight check refuse
+# to drive an output the car has already recorded faults against. Without it the
+# preflight still runs, just with less information.
+#
+# The corresponding Tool32 jobs are status_kurzschlusscounter_abs and
+# status_lampen_kurzschluss_counter.
+[[action]]
+id = "lamp.counters"
+ecu = "FEM_BODY"
+service = 0x2F
+identifier = 0x0000 # PLACEHOLDER
+session = 0x03
+verified = false
+info = "PLACEHOLDER. Replace with the short-circuit counter DID. Read-only in practice."
+
+  [[action.param]]
+  name = "lamp"
+  datatype = "char"
+  info = "LAMPNR to query"
+
+# Lamps present on F-series. FEM_20 omits the rear lamps because those are on
+# the REM, so they are left out here rather than offered and then failing.
+[lamps]
+available = [
+  "AL_L", "AL_R",
+  "TFL_L", "TFL_R",
+  "SML_L", "SML_R",
+  "FL_L", "FL_R",
+  "POL_L", "POL_R",
+  "NSW_L", "NSW_R",
+  "FRA_V_L", "FRA_V_R",
+  "FRA_Z_L", "FRA_Z_R",
+  "BIX_L", "BIX_R",
+  "WBL_LED",
+  "LCI_0", "LCI_1", "LCI_2", "LCI_3", "LCI_4", "LCI_5", "LCI_6", "LCI_7", "LCI_8",
+  "TMS_LEUCHTRING_L", "TMS_LEUCHTRING_R",
+  "TMS_SML_L", "TMS_SML_R",
+  "TMS_DESIGN_L", "TMS_DESIGN_R",
+]

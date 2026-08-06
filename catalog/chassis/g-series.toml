@@ -1,0 +1,106 @@
+# TEMPLATE — BMW G-series (G01-G80) and U-series, DoIP over ENET.
+#
+# As with the F-series template, every identifier is a PLACEHOLDER and every
+# action is verified = false. Fill them in from BDC_G05.PRG or BDC_G11.PRG using
+# the procedure in docs/protocol-research.md section 6.
+#
+# G-series differs from F-series in two ways that matter here:
+#   - The transport is DoIP (TCP 13400) rather than HSFZ (TCP 6801), and DoIP
+#     requires a routing activation handshake. Strobelight handles that when the
+#     transport is set to "doip" below.
+#   - The BDC covers rear lighting too, so the rear lamps are available here
+#     where the F-series template omits them.
+
+schema_version = 1
+
+[chassis]
+id = "G2x"
+name = "BMW G-series (G01-G80)"
+transport = "doip"
+notes = "TEMPLATE: identifiers are placeholders. Fill them in from BDC_G05.PRG or BDC_G11.PRG."
+
+[[ecu]]
+name = "BDC_BODY"
+address = 0x40
+info = "Body Domain Controller. Owns front and rear exterior lighting on G-series."
+
+[[ecu]]
+name = "GW"
+address = 0x10
+info = "Gateway"
+
+[[ecu]]
+name = "LHM_L"
+address = 0x43
+info = "LED headlight main module, left"
+
+[[ecu]]
+name = "LHM_R"
+address = 0x44
+info = "LED headlight main module, right"
+
+[[action]]
+id = "lamp.set"
+ecu = "BDC_BODY"
+service = 0x2F
+identifier = 0x0000 # PLACEHOLDER
+session = 0x03
+control_actuate = 0x03 # STA
+control_release = 0x00 # RCTECU
+min_dwell_ms = 40
+verified = false
+info = "PLACEHOLDER. Replace identifier with the lighting control DID from SG_Funktionen."
+
+  [[action.param]]
+  name = "lamp"
+  datatype = "char"
+  info = "LAMPNR from LAMPNRTEXTE"
+
+  [[action.param]]
+  name = "level"
+  datatype = "char"
+  min = 0.0
+  max = 100.0
+  info = "Brightness percentage"
+
+[[action]]
+id = "lamp.counters"
+ecu = "BDC_BODY"
+service = 0x2F
+identifier = 0x0000 # PLACEHOLDER
+session = 0x03
+verified = false
+info = "PLACEHOLDER. Short-circuit counter DID. Tool32 job: _steuern_licht_kurzschlusscounter_abs."
+
+  [[action.param]]
+  name = "lamp"
+  datatype = "char"
+  info = "LAMPNR to query"
+
+# The G-series BDC covers rear lighting, so the rear lamps and the light carpet
+# channels are available in addition to everything the F-series has.
+[lamps]
+available = [
+  "AL_L", "AL_R",
+  "TFL_L", "TFL_R",
+  "SML_L", "SML_R",
+  "FL_L", "FL_R",
+  "POL_L", "POL_R",
+  "NSW_L", "NSW_R",
+  "FRA_V_L", "FRA_V_R",
+  "FRA_Z_L", "FRA_Z_R",
+  "SL_L", "SL_R", "SL_2_L", "SL_2_R",
+  "BL_L", "BL_R", "BL_M",
+  "BFD_L", "BFD_R",
+  "NSL_L", "NSL_R",
+  "RFS_L", "RFS_R",
+  "FRA_H_L", "FRA_H_R",
+  "KZL",
+  "WBL_LED",
+  "LCI_0", "LCI_1", "LCI_2", "LCI_3", "LCI_4", "LCI_5", "LCI_6", "LCI_7", "LCI_8",
+  "TMS_LEUCHTRING_L", "TMS_LEUCHTRING_R",
+  "TMS_SML_L", "TMS_SML_R",
+  "TMS_DESIGN_L", "TMS_DESIGN_R",
+  "LC_R0", "LC_R1", "LC_R2", "LC_R3",
+  "PDC_LED", "HDC_LED", "MSA_LED", "SST_LED",
+]
