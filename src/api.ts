@@ -3,7 +3,7 @@
  *
  * Every call funnels through here so the rest of the UI never touches `invoke`
  * directly, which keeps the command names in one place and gives each call a
- * real signature.
+ * real signature. Strobes is a desktop app only — there is no browser backend.
  */
 
 import { invoke } from "@tauri-apps/api/core";
@@ -24,21 +24,16 @@ import type {
   VehicleInfo,
 } from "./types";
 
-/** True when running inside the Tauri shell rather than a plain browser. */
-export const isDesktop = "__TAURI_INTERNALS__" in window;
-
-/**
- * Calls a command, or rejects with a clear message in the browser.
- *
- * The UI is also served as a plain web page for preset browsing, where no
- * backend exists. Failing with an explanation beats an opaque undefined error.
- */
-async function call<T>(command: string, args?: Record<string, unknown>): Promise<T> {
-  if (!isDesktop) {
+function assertDesktop(): void {
+  if (!("__TAURI_INTERNALS__" in window)) {
     throw new Error(
-      "This needs the Strobes desktop app. A browser cannot open the raw network sockets an ENET connection requires.",
+      "Strobes only runs as the desktop app. Use npm run dev (or npm run tauri:dev).",
     );
   }
+}
+
+async function call<T>(command: string, args?: Record<string, unknown>): Promise<T> {
+  assertDesktop();
   return invoke<T>(command, args);
 }
 
@@ -112,6 +107,6 @@ export const simulatorStatus = () => call<string | null>("simulator_status");
 export async function onEngineEvent(
   handler: (event: EngineEvent) => void,
 ): Promise<UnlistenFn> {
-  if (!isDesktop) return () => {};
+  assertDesktop();
   return listen<EngineEvent>("engine-event", (message) => handler(message.payload));
 }

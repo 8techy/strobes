@@ -21,8 +21,11 @@ HSFZ and DoIP BMW protocols</br>
 
 ```bash
 npm install
-npm run tauri:dev
+npm run dev
 ```
+
+That launches the Tauri desktop window (Vite only runs as the webview UI
+bundler in the background — there is no standalone browser app).
 
 ### Test
 
@@ -34,7 +37,7 @@ cargo test --workspace
 ### Package
 
 ```bash
-npm run tauri:build
+npm run build
 ```
 
 Produces an MSI and NSIS installer on Windows, a `.dmg` on macOS, and `.deb` plus

@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "identifier": "com.strobes.app",
   "build": {
-    "beforeDevCommand": "npm run dev",
+    "beforeDevCommand": "npm run vite:dev",
     "devUrl": "http://localhost:5173",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": "npm run vite:build",
     "frontendDist": "../dist"
   },
   "app": {
