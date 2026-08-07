@@ -9,6 +9,7 @@
 
 import { useState } from "react";
 
+import * as api from "../api";
 import { useStore } from "../store";
 
 /** BMW's per-lamp short-circuit shutdown limit. */
@@ -44,26 +45,51 @@ function CounterBar({ counter }: { counter: number }) {
 export function Safety() {
   const preflight = useStore((s) => s.preflight);
   const runPreflight = useStore((s) => s.runPreflight);
+  const loadDtcs = useStore((s) => s.loadDtcs);
+  const setError = useStore((s) => s.setError);
   const connected = useStore((s) => s.status?.connected ?? false);
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<"preflight" | "clear" | null>(null);
 
   async function run() {
-    setBusy(true);
+    setBusy("preflight");
     await runPreflight();
-    setBusy(false);
+    setBusy(null);
   }
+
+  async function clearCodes() {
+    setBusy("clear");
+    try {
+      await api.clearDtcs();
+      await loadDtcs();
+      await runPreflight();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  const hasStoredCodes = (preflight?.dtcs_before.length ?? 0) > 0;
 
   return (
     <div className="mx-auto max-w-4xl space-y-4">
       <div className="card p-4">
-        <div className="mb-2 flex items-center gap-3">
+        <div className="mb-2 flex flex-wrap items-center gap-3">
           <h2 className="flex-1 text-base font-bold">Preflight check</h2>
           <button
+            className="btn btn-ghost"
+            disabled={!connected || busy !== null}
+            onClick={() => void clearCodes()}
+            title="Clears stored fault codes on the body controller"
+          >
+            {busy === "clear" ? "Clearing" : "Clear codes"}
+          </button>
+          <button
             className="btn btn-primary"
-            disabled={!connected || busy}
+            disabled={!connected || busy !== null}
             onClick={() => void run()}
           >
-            {busy ? "Checking" : "Run preflight"}
+            {busy === "preflight" ? "Checking" : "Run preflight"}
           </button>
         </div>
         <p className="text-sm text-[var(--color-ink-300)]">
@@ -167,7 +193,19 @@ export function Safety() {
           </div>
 
           <div className="card p-4">
-            <h3 className="mb-1 font-semibold">Faults present before connecting</h3>
+            <div className="mb-1 flex flex-wrap items-center gap-3">
+              <h3 className="flex-1 font-semibold">Faults present before connecting</h3>
+              {hasStoredCodes && (
+                <button
+                  className="btn btn-ghost"
+                  disabled={!connected || busy !== null}
+                  onClick={() => void clearCodes()}
+                  title="Clears stored fault codes on the body controller"
+                >
+                  {busy === "clear" ? "Clearing" : "Clear codes"}
+                </button>
+              )}
+            </div>
             <p className="mb-3 text-xs text-[var(--color-ink-400)]">
               Recorded so you can tell pre-existing codes apart from anything new.
             </p>
