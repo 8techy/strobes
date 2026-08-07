@@ -46,8 +46,6 @@ interface StrobeState {
   /** Live lamp brightness, driven by engine step events. */
   lampVisuals: LampVisualState;
 
-  simulatorAddress: string | null;
-
   setError: (error: string | null) => void;
   refreshStatus: () => Promise<void>;
   connect: (protocol: Protocol, host: string, port?: number) => Promise<void>;
@@ -62,8 +60,6 @@ interface StrobeState {
   refreshEngine: () => Promise<void>;
   applyLampVisual: (lamp: number, level: number) => void;
   clearLampVisuals: () => void;
-  startSimulator: (protocol: Protocol) => Promise<string>;
-  stopSimulator: () => Promise<void>;
 }
 
 /** Runs an action, routing any failure into the error banner. */
@@ -88,7 +84,6 @@ export const useStore = create<StrobeState>((set, get) => ({
   effects: [],
   engine: null,
   lampVisuals: {},
-  simulatorAddress: null,
 
   setError: (error) => set({ error }),
 
@@ -190,19 +185,4 @@ export const useStore = create<StrobeState>((set, get) => ({
     set((state) => ({ lampVisuals: { ...state.lampVisuals, [lamp]: level } })),
 
   clearLampVisuals: () => set({ lampVisuals: {} }),
-
-  startSimulator: async (protocol) => {
-    const address = await api.startSimulator(protocol);
-    set({ simulatorAddress: address });
-    await get().refreshStatus();
-    return address;
-  },
-
-  stopSimulator: async () => {
-    await guarded(async () => {
-      await api.stopSimulator();
-      set({ simulatorAddress: null });
-      await get().refreshStatus();
-    }, (error) => set({ error }));
-  },
 }));

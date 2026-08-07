@@ -151,6 +151,10 @@ const POL_L: u8 = 0x09;
 const POL_R: u8 = 0x0A;
 const NSW_L: u8 = 0x0B;
 const NSW_R: u8 = 0x0C;
+const SL_L: u8 = 0x14;
+const SL_R: u8 = 0x15;
+const SL2_L: u8 = 0x16;
+const SL2_R: u8 = 0x17;
 const RING_L: u8 = 0x30;
 const RING_R: u8 = 0x31;
 const DESIGN_L: u8 = 0x34;
@@ -320,6 +324,65 @@ pub fn presets() -> Vec<Effect> {
                     duration_ms: 150,
                 },
             ],
+        },
+        Effect {
+            id: "jdm-drift".into(),
+            name: "JDM Drift".into(),
+            description: "Classic street-drift strobe: snappy left/right rings, beams and fogs, with matching rear tails.".into(),
+            looping: true,
+            timing: Timing::Fixed,
+            steps: {
+                // Outer = low beam, rings/TFL = angel eyes, fog = bumper, SL = rear bars.
+                const left_on: &[u8] = &[NSW_L, RING_L, TFL_L, 0x01, 0x07, SL_L, SL2_L];
+                const right_on: &[u8] = &[NSW_R, RING_R, TFL_R, 0x02, 0x08, SL_R, SL2_R];
+                let side = |on: &[u8], off: &[u8]| -> Vec<LampCommand> {
+                    on.iter()
+                        .map(|&l| LampCommand::on(l))
+                        .chain(off.iter().map(|&l| LampCommand::off(l)))
+                        .collect()
+                };
+                let both = |level: u8| -> Vec<LampCommand> {
+                    left_on
+                        .iter()
+                        .chain(right_on.iter())
+                        .map(|&l| LampCommand::at(l, level))
+                        .collect()
+                };
+                vec![
+                    Step {
+                        commands: side(left_on, right_on),
+                        duration_ms: 70,
+                    },
+                    Step {
+                        commands: side(right_on, left_on),
+                        duration_ms: 70,
+                    },
+                    Step {
+                        commands: side(left_on, right_on),
+                        duration_ms: 70,
+                    },
+                    Step {
+                        commands: side(right_on, left_on),
+                        duration_ms: 70,
+                    },
+                    Step {
+                        commands: both(100),
+                        duration_ms: 55,
+                    },
+                    Step {
+                        commands: both(0),
+                        duration_ms: 55,
+                    },
+                    Step {
+                        commands: both(100),
+                        duration_ms: 55,
+                    },
+                    Step {
+                        commands: both(0),
+                        duration_ms: 220,
+                    },
+                ]
+            },
         },
         Effect {
             id: "fog-strobe".into(),
