@@ -24,15 +24,7 @@ npm install
 npm run dev
 ```
 
-That launches the Tauri desktop window (Vite only runs as the webview UI
-bundler in the background — there is no standalone browser app).
-
-### Test
-
-```bash
-cd src-tauri
-cargo test --workspace
-```
+Launches Tauri Desktop view
 
 ### Package
 
@@ -42,18 +34,6 @@ npm run build
 
 Produces an MSI and NSIS installer on Windows, a `.dmg` on macOS, and `.deb` plus
 AppImage on Linux, in `src-tauri/target/release/bundle/`.
-
-### Regenerate the app icon
-
-Brand marks live in `public/`. Sync the dark icon into Tauri's source slot, then
-expand it to every platform size:
-
-```bash
-node scripts/generate-icon.mjs
-npx tauri icon src-tauri/icons/source.png
-```
-
----
 
 ## Architecture
 
