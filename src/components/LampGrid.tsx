@@ -2,8 +2,8 @@
  * A grid of lamp outputs showing live brightness.
  *
  * Used as both a live preview during playback and a picker in the lab and
- * editor. Safety-critical outputs are visually distinct so nobody drives the
- * brake lights by accident.
+ * editor. Safety-critical outputs stay selectable; the engine still gates
+ * effects that drive them behind confirmation.
  */
 
 import type { LampInfo } from "../types";
@@ -17,8 +17,6 @@ interface LampGridProps {
   /** Lamp ids the car has recorded faults against. */
   degraded?: Set<number>;
   onPick?: (lamp: LampInfo) => void;
-  /** Hide outputs that are legally regulated signalling devices. */
-  featuredOnly?: boolean;
 }
 
 export function LampGrid({
@@ -27,20 +25,17 @@ export function LampGrid({
   selected,
   degraded,
   onPick,
-  featuredOnly = false,
 }: LampGridProps) {
-  const visible = featuredOnly ? lamps.filter((lamp) => lamp.featured) : lamps;
-
   // Group by the label the Rust side already computed, so ordering and naming
   // stay consistent with the catalog.
   const groups = new Map<string, LampInfo[]>();
-  for (const lamp of visible) {
+  for (const lamp of lamps) {
     const existing = groups.get(lamp.group);
     if (existing) existing.push(lamp);
     else groups.set(lamp.group, [lamp]);
   }
 
-  if (visible.length === 0) {
+  if (lamps.length === 0) {
     return (
       <p className="text-sm text-[var(--color-ink-400)]">
         No lamps available. Load a catalog for your chassis.
@@ -100,7 +95,6 @@ export function LampGrid({
                   </span>
                   <span className="relative mono block text-[0.65rem] text-[var(--color-ink-400)]">
                     {lamp.code} · {lamp.idHex}
-                    {lamp.safetyCritical && " · regulated"}
                   </span>
                 </button>
               );

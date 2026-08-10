@@ -345,7 +345,7 @@ mod tests {
         assert_eq!(report.degraded_lamps.len(), 1);
         assert!(report.degraded_lamps[0].locked_out);
         // The message names the lamp so the user knows what to repair.
-        assert!(report.blockers[0].contains("Daytime running light, left"));
+        assert!(report.blockers[0].contains("DRL, left"));
     }
 
     #[test]

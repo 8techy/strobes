@@ -235,7 +235,7 @@ export function Effects() {
           ) : (
             <p className="mb-3 text-xs text-[var(--color-ink-400)]">Idle.</p>
           )}
-          <LampGrid lamps={lamps} levels={lampVisuals} featuredOnly />
+          <LampGrid lamps={lamps} levels={lampVisuals} />
         </div>
       </div>
     </div>

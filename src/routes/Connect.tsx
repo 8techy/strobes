@@ -59,7 +59,7 @@ function ConnectConfirm({
           linked to the car before you continue.
         </p>
         <p className="mb-4 text-sm leading-relaxed text-[var(--color-ink-400)]">
-          Ignition on, engine off. Target{" "}
+          Ignition on. Target{" "}
           <span className="mono text-[var(--color-ink-300)]">{pending.host}</span>
           {pending.port != null ? `:${pending.port}` : ""} over{" "}
           {pending.protocol.toUpperCase()}.

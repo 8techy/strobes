@@ -239,8 +239,9 @@ export function Safety() {
           </li>
           <li>Nothing is ever sent to the engine control module.</li>
           <li>
-            Effects only run when the car is stationary with the engine off. The
-            module itself enforces this and reports why if it refuses.
+            Some cars refuse light control while moving or with the engine
+            running. Strobes still tries; if the body module rejects a request,
+            the reason is shown in the banner.
           </li>
         </ul>
       </div>

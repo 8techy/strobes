@@ -2,13 +2,19 @@
  * Editor screen: build an effect step by step.
  *
  * Surfaces the car's timing floor directly in the duration control, so it is not
- * possible to author something the vehicle silently fails to render.
+ * possible to author something the vehicle silently fails to render. A pattern
+ * dropdown fills the steps, lamps, and timing so presets are editable, not opaque.
  */
 
 import { useEffect, useState } from "react";
 
 import * as api from "../api";
 import { LampGrid } from "../components/LampGrid";
+import {
+  EDITOR_PRESETS,
+  presetById,
+  type EditorPresetId,
+} from "../editorPresets";
 import { useStore } from "../store";
 import type { Effect, LampInfo, Step } from "../types";
 
@@ -30,12 +36,12 @@ export function Editor() {
 
   const floor = Math.max(RENDERABLE_STEP_MS, engine?.minDwellMs ?? 40);
 
+  const [presetId, setPresetId] = useState<EditorPresetId>("custom");
   const [name, setName] = useState("My effect");
   const [looping, setLooping] = useState(true);
   const [perBeat, setPerBeat] = useState(false);
   const [steps, setSteps] = useState<Step[]>([emptyStep(200), emptyStep(200)]);
   const [activeStep, setActiveStep] = useState(0);
-  const [showRegulated, setShowRegulated] = useState(false);
 
   useEffect(() => {
     void loadLamps();
@@ -47,13 +53,37 @@ export function Editor() {
     current?.commands.filter((c) => c.level > 0).map((c) => c.lamp) ?? [],
   );
 
+  /** Loads a pattern into name, loop, beat mode, and every step. */
+  function applyPreset(id: EditorPresetId) {
+    const preset = presetById(id);
+    setPresetId(id);
+    setName(preset.name);
+    setLooping(preset.looping);
+    setPerBeat(preset.perBeat);
+    setSteps(
+      preset.steps.map((step) => ({
+        ...step,
+        duration_ms: Math.max(floor, step.duration_ms),
+      })),
+    );
+    setActiveStep(0);
+  }
+
+  /** Any manual edit leaves the preset dropdown on Custom. */
+  function markCustom() {
+    if (presetId !== "custom") setPresetId("custom");
+  }
+
   /** Toggles a lamp within the active step. */
   function toggleLamp(lamp: LampInfo) {
+    markCustom();
     setSteps((previous) =>
       previous.map((step, index) => {
         if (index !== activeStep) return step;
         const existing = step.commands.find((c) => c.lamp === lamp.id);
-        if (existing) {
+        // Level 0 is an explicit off from a preset — treat it as unselected so a
+        // click turns the lamp on instead of silently dropping the command.
+        if (existing && existing.level > 0) {
           return {
             ...step,
             commands: step.commands.filter((c) => c.lamp !== lamp.id),
@@ -61,13 +91,17 @@ export function Editor() {
         }
         return {
           ...step,
-          commands: [...step.commands, { lamp: lamp.id, level: 100 }],
+          commands: [
+            ...step.commands.filter((c) => c.lamp !== lamp.id),
+            { lamp: lamp.id, level: 100 },
+          ],
         };
       }),
     );
   }
 
   function setDuration(index: number, value: number) {
+    markCustom();
     setSteps((previous) =>
       previous.map((step, i) =>
         i === index ? { ...step, duration_ms: Math.max(floor, value) } : step,
@@ -76,12 +110,14 @@ export function Editor() {
   }
 
   function addStep() {
+    markCustom();
     setSteps((previous) => [...previous, emptyStep(Math.max(floor, 200))]);
     setActiveStep(steps.length);
   }
 
   function removeStep(index: number) {
     if (steps.length <= 1) return;
+    markCustom();
     setSteps((previous) => previous.filter((_, i) => i !== index));
     setActiveStep((prev) => {
       if (prev > index) return prev - 1;
@@ -127,6 +163,24 @@ export function Editor() {
       <div className="space-y-4">
         <div className="card space-y-3 p-4">
           <div>
+            <label className="label" htmlFor="effect-preset">
+              Pattern
+            </label>
+            <select
+              id="effect-preset"
+              className="input"
+              value={presetId}
+              onChange={(e) => applyPreset(e.target.value as EditorPresetId)}
+            >
+              {EDITOR_PRESETS.map((preset) => (
+                <option key={preset.id} value={preset.id}>
+                  {preset.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
             <label className="label" htmlFor="effect-name">
               Name
             </label>
@@ -134,7 +188,10 @@ export function Editor() {
               id="effect-name"
               className="input"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => {
+                markCustom();
+                setName(e.target.value);
+              }}
             />
           </div>
 
@@ -142,7 +199,10 @@ export function Editor() {
             <input
               type="checkbox"
               checked={looping}
-              onChange={(e) => setLooping(e.target.checked)}
+              onChange={(e) => {
+                markCustom();
+                setLooping(e.target.checked);
+              }}
             />
             Loop
           </label>
@@ -151,7 +211,10 @@ export function Editor() {
             <input
               type="checkbox"
               checked={perBeat}
-              onChange={(e) => setPerBeat(e.target.checked)}
+              onChange={(e) => {
+                markCustom();
+                setPerBeat(e.target.checked);
+              }}
             />
             Advance one step per beat
           </label>
@@ -179,7 +242,11 @@ export function Editor() {
         <div className="card p-4">
           <div className="mb-3 flex items-center gap-2">
             <h3 className="flex-1 font-semibold">Steps</h3>
-            <button className="btn btn-ghost" onClick={addStep}>
+            <button
+              className="btn btn-ghost"
+              title="Append a new empty step you can fill with lamps and timing."
+              onClick={addStep}
+            >
               Add
             </button>
           </div>
@@ -208,8 +275,10 @@ export function Editor() {
                   >
                     Step {index + 1}
                     <span className="ml-2 text-xs font-normal text-[var(--color-ink-400)]">
-                      {step.commands.length} lamp
-                      {step.commands.length === 1 ? "" : "s"}
+                      {step.commands.filter((c) => c.level > 0).length} lamp
+                      {step.commands.filter((c) => c.level > 0).length === 1
+                        ? ""
+                        : "s"}
                     </span>
                   </button>
                   <button
@@ -251,25 +320,18 @@ export function Editor() {
           <h3 className="flex-1 font-semibold">
             Lamps in step {activeStep + 1}
           </h3>
-          <label className="flex items-center gap-2 text-xs">
-            <input
-              type="checkbox"
-              checked={showRegulated}
-              onChange={(e) => setShowRegulated(e.target.checked)}
-            />
-            Show regulated devices
-          </label>
         </div>
 
         <LampGrid
           lamps={lamps}
-          levels={engine?.running ? lampVisuals : Object.fromEntries(
-            [...selected].map((id) => [id, 100]),
-          )}
+          levels={
+            engine?.running
+              ? lampVisuals
+              : Object.fromEntries([...selected].map((id) => [id, 100]))
+          }
           selected={selected}
           degraded={degraded}
           onPick={toggleLamp}
-          featuredOnly={!showRegulated}
         />
       </div>
     </div>

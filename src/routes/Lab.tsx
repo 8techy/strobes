@@ -25,7 +25,6 @@ export function Lab() {
   const engine = useStore((s) => s.engine);
 
   const [level, setLevel] = useState(100);
-  const [showRegulated, setShowRegulated] = useState(false);
   const [lastResult, setLastResult] = useState<string | null>(null);
 
   useEffect(() => {
@@ -84,15 +83,6 @@ export function Lab() {
           />
         </div>
 
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={showRegulated}
-            onChange={(e) => setShowRegulated(e.target.checked)}
-          />
-          Show regulated signalling devices
-        </label>
-
         <button className="btn btn-ghost" onClick={() => void release()}>
           Release all
         </button>
@@ -122,7 +112,6 @@ export function Lab() {
           levels={lampVisuals}
           degraded={degraded}
           onPick={(lamp) => void toggle(lamp)}
-          featuredOnly={!showRegulated}
         />
       </div>
     </div>

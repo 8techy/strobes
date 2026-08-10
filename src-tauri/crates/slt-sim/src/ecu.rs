@@ -354,15 +354,12 @@ impl SimulatedEcu {
     }
 
     /// Maps simulated vehicle conditions onto the NRC a real module would send.
+    ///
+    /// Speed and engine-running are intentionally not gated so shows can be
+    /// exercised while "driving". A real FEM/BDC may still answer 0x83 / 0x88.
     fn condition_failure(&self) -> Option<Nrc> {
         if !self.conditions.ignition_on {
             return Some(Nrc::CONDITIONS_NOT_CORRECT);
-        }
-        if self.conditions.engine_running {
-            return Some(Nrc(0x83));
-        }
-        if self.conditions.speed_kph > 0 {
-            return Some(Nrc(0x88));
         }
         if self.conditions.voltage < 11.0 {
             return Some(Nrc(0x93));
@@ -474,24 +471,24 @@ mod tests {
     }
 
     #[test]
-    fn a_running_engine_blocks_actuation() {
+    fn a_running_engine_does_not_block_actuation() {
         let mut ecu = fem();
         ecu.handle(&[0x10, 0x03]);
         ecu.conditions.engine_running = true;
         assert_eq!(
             ecu.handle(&[0x2F, 0xD0, 0xFF, 0x03, 0x30, 100]),
-            vec![0x7F, 0x2F, 0x83]
+            vec![0x6F, 0xD0, 0xFF, 0x03]
         );
     }
 
     #[test]
-    fn movement_blocks_actuation() {
+    fn movement_does_not_block_actuation() {
         let mut ecu = fem();
         ecu.handle(&[0x10, 0x03]);
         ecu.conditions.speed_kph = 30;
         assert_eq!(
             ecu.handle(&[0x2F, 0xD0, 0xFF, 0x03, 0x30, 100]),
-            vec![0x7F, 0x2F, 0x88]
+            vec![0x6F, 0xD0, 0xFF, 0x03]
         );
     }
 
