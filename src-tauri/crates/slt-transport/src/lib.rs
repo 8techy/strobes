@@ -1,15 +1,18 @@
-//! Diagnostic transports for BMW ENET connections.
+//! Diagnostic transports for vehicle connections.
 //!
-//! Two wire protocols carry the same UDS payloads: HSFZ on F-series and DoIP on
-//! G-series. [`Connection`] hides the difference so higher layers only deal in
-//! UDS bytes and an ECU address.
+//! BMW ENET uses two wire protocols for the same UDS payloads: HSFZ on F-series
+//! and DoIP on G-series. ZN8 / ZC8 (GR86 / BRZ) research adds ISO-TP framing
+//! over CAN; the SocketCAN backend is not wired yet. [`Connection`] hides the
+//! difference so higher layers only deal in UDS bytes and an ECU address.
 //!
-//! Protocol details and sources are in `docs/protocol-research.md`.
+//! Protocol details: BMW ENET research notes and `catalog/zn8-research.md`
+//! (ZN8 spike).
 
 pub mod discovery;
 pub mod doip;
 pub mod error;
 pub mod hsfz;
+pub mod isotp;
 
 use std::net::IpAddr;
 use std::time::Duration;
@@ -25,6 +28,8 @@ pub enum Protocol {
     Hsfz,
     /// ISO 13400, G-series. TCP 13400.
     DoIp,
+    /// ISO 15765-2 over CAN. Used by ZN8 / ZC8 research; no live backend yet.
+    IsoTp,
 }
 
 impl Protocol {
@@ -32,6 +37,8 @@ impl Protocol {
         match self {
             Self::Hsfz => hsfz::DIAGNOSTIC_PORT,
             Self::DoIp => doip::PORT,
+            // CAN interfaces are named, not TCP-ported. Zero signals "unused".
+            Self::IsoTp => 0,
         }
     }
 
@@ -39,6 +46,7 @@ impl Protocol {
         match self {
             Self::Hsfz => "HSFZ",
             Self::DoIp => "DoIP",
+            Self::IsoTp => "ISO-TP",
         }
     }
 }
@@ -104,6 +112,14 @@ impl Connection {
             }
             Protocol::DoIp => {
                 Self::DoIp(doip::DoIpConnection::connect(ip, port, timeout).await?)
+            }
+            Protocol::IsoTp => {
+                // Framing lives in `isotp`; a SocketCAN (or USB-CAN) backend is
+                // the next spike. Fail loudly so the UI never looks "connected".
+                let _ = (ip, port, timeout);
+                return Err(TransportError::IsoTpNotImplemented(
+                    "SocketCAN backend not wired yet; see catalog/zn8-research.md",
+                ));
             }
         })
     }
@@ -175,6 +191,29 @@ pub mod ecu {
     ];
 }
 
+/// Hypothesized ZN8 / ZC8 (GR86 / BRZ) diagnostic addresses.
+///
+/// These are community-reported ISO-TP CAN identifiers, not confirmed in this
+/// repository. Treat as research leads. See `catalog/zn8-research.md`.
+pub mod zn8 {
+    use super::EcuAddress;
+
+    /// Powertrain / ECM request ID. Never an actuation target.
+    pub const ECM_REQUEST: EcuAddress = EcuAddress::new(0x7E0);
+    /// Powertrain / ECM response ID (informational; transport pairs this).
+    pub const ECM_RESPONSE: u16 = 0x7E8;
+    /// Body Control Module request ID. Primary lighting candidate.
+    pub const BCM_REQUEST: EcuAddress = EcuAddress::new(0x7E1);
+    /// Body Control Module response ID.
+    pub const BCM_RESPONSE: u16 = 0x7E9;
+
+    /// Modules to probe once an ISO-TP backend exists.
+    pub const LIGHTING_SCAN: &[(EcuAddress, &str)] = &[
+        (BCM_REQUEST, "BCM (body control, exterior lighting)"),
+        (ECM_REQUEST, "ECM (powertrain — probe only, never actuate)"),
+    ];
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -195,10 +234,32 @@ mod tests {
     fn protocols_use_standard_ports() {
         assert_eq!(Protocol::Hsfz.default_port(), 6801);
         assert_eq!(Protocol::DoIp.default_port(), 13400);
+        assert_eq!(Protocol::IsoTp.default_port(), 0);
     }
 
     #[test]
     fn dme_is_not_in_the_lighting_scan_list() {
         assert!(!ecu::LIGHTING_SCAN.iter().any(|(a, _)| *a == ecu::DME));
+    }
+
+    #[test]
+    fn zn8_bcm_is_distinct_from_ecm() {
+        assert_ne!(zn8::BCM_REQUEST, zn8::ECM_REQUEST);
+        assert_eq!(zn8::BCM_REQUEST.0, 0x7E1);
+    }
+
+    #[tokio::test]
+    async fn isotp_open_fails_until_backend_exists() {
+        let result = Connection::open(
+            Protocol::IsoTp,
+            "127.0.0.1".parse().unwrap(),
+            None,
+            Duration::from_millis(10),
+        )
+        .await;
+        assert!(matches!(
+            result,
+            Err(TransportError::IsoTpNotImplemented(_))
+        ));
     }
 }

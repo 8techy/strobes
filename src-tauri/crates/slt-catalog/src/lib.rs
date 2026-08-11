@@ -452,10 +452,11 @@ impl Catalog {
     /// Lamps this chassis supports, in enumeration order.
     ///
     /// An empty availability list means the catalog author has not narrowed it
-    /// down, so every known lamp is offered.
+    /// down, so every **BMW** lamp is offered (ids below the ZN8 research
+    /// range). ZN8 / other platforms must list `available` explicitly.
     pub fn lamps(&self) -> Vec<&'static Lamp> {
         if self.lamps.available.is_empty() {
-            return lamp::ALL.iter().collect();
+            return lamp::ALL.iter().filter(|l| l.id < 0x80).collect();
         }
         self.lamps
             .available
@@ -736,9 +737,26 @@ identifier = 0xD000
     }
 
     #[test]
-    fn empty_availability_offers_every_lamp() {
+    fn zn8_research_catalog_parses() {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../../catalog/chassis/zn8.toml");
+        let catalog = Catalog::load(&path).expect("zn8.toml should parse");
+        assert_eq!(catalog.chassis.id, "ZN8");
+        assert_eq!(catalog.chassis.transport, Protocol::IsoTp);
+        assert!(!catalog.fully_verified());
+        let lamps = catalog.lamps();
+        assert!(lamps.iter().all(|l| l.code.starts_with("ZN8_")));
+        assert!(lamps.len() >= 10);
+    }
+
+    #[test]
+    fn empty_availability_offers_bmw_lamps_only() {
         let catalog = sample();
-        assert_eq!(catalog.lamps().len(), lamp::ALL.len());
+        let lamps = catalog.lamps();
+        assert!(!lamps.is_empty());
+        assert!(lamps.iter().all(|l| l.id < 0x80));
+        assert!(lamp::by_code("ZN8_DRL_L").is_some());
+        assert!(!lamps.iter().any(|l| l.code.starts_with("ZN8_")));
     }
 
     #[test]

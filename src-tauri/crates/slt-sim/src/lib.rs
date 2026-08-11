@@ -84,6 +84,12 @@ impl Simulator {
                             let result = match protocol {
                                 Protocol::Hsfz => serve_hsfz(stream, ecus).await,
                                 Protocol::DoIp => serve_doip(stream, ecus).await,
+                                Protocol::IsoTp => {
+                                    Err(std::io::Error::new(
+                                        std::io::ErrorKind::Unsupported,
+                                        "simulator has no ISO-TP listener yet",
+                                    ))
+                                }
                             };
                             if let Err(e) = result {
                                 tracing::debug!(error = %e, "simulator session ended");

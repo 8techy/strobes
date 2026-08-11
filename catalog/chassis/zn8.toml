@@ -1,0 +1,85 @@
+# TEMPLATE — Toyota GR86 (ZN8) / Subaru BRZ (ZC8), ISO-TP over CAN.
+#
+# Research spike. Nothing in this file will turn a lamp on until:
+#   1. An ISO-TP / SocketCAN backend is wired (see catalog/zn8-research.md)
+#   2. Identifiers are replaced with values captured from your own car
+#   3. verified is set to true after confirmation
+#
+# Strobes refuses to transmit unverified actions unless research mode is on.
+#
+# Address and service values below are HYPOTHESES from community reports, not
+# confirmed mappings. Do not treat them as a working recipe.
+
+schema_version = 1
+
+[chassis]
+id = "ZN8"
+name = "Toyota GR86 / Subaru BRZ (ZN8/ZC8)"
+transport = "isotp"
+notes = """
+TEMPLATE / RESEARCH: ISO-TP over OBD-II CAN at 500 kbit/s.
+BCM request ID 0x7E1 is a community-reported lead, not verified here.
+Fill identifiers from a Techstream/SSM5 active-test capture on your own car.
+See catalog/zn8-research.md.
+"""
+
+[[ecu]]
+name = "BCM"
+address = 0x7E1
+info = "Body Control Module (hypothesized ISO-TP request ID). Owns exterior lighting candidates."
+
+[[ecu]]
+name = "ECM"
+address = 0x7E0
+info = "Engine Control Module. Probe only — never an actuation target."
+
+# Placeholder lamp control. Identifier 0xFFFF is intentionally invalid so a
+# mistaken research-mode send is more likely to get NRC 0x31 than to hit a
+# real DID. Replace after capture.
+[[action]]
+id = "lamp.set"
+ecu = "BCM"
+service = 0x2F
+identifier = 0xFFFF
+session = 0x03
+control_actuate = 0x03
+control_release = 0x00
+min_dwell_ms = 80
+verified = false
+info = "PLACEHOLDER. Capture Techstream/SSM5 lighting active tests to learn the real DID/RID and parameter layout. SecurityAccess (0x27) may be required first."
+
+  [[action.param]]
+  name = "lamp"
+  datatype = "char"
+  info = "Local ZN8 lamp id from the ZN8_* catalog codes (not BMW LAMPNR)."
+
+  [[action.param]]
+  name = "level"
+  datatype = "char"
+  min = 0.0
+  max = 100.0
+  info = "Brightness percent if the module supports levels; otherwise treat as on/off."
+
+[lamps]
+available = [
+  "ZN8_DRL_L",
+  "ZN8_DRL_R",
+  "ZN8_LOW_L",
+  "ZN8_LOW_R",
+  "ZN8_HIGH_L",
+  "ZN8_HIGH_R",
+  "ZN8_PARK_L",
+  "ZN8_PARK_R",
+  "ZN8_TURN_F_L",
+  "ZN8_TURN_F_R",
+  "ZN8_TURN_R_L",
+  "ZN8_TURN_R_R",
+  "ZN8_TAIL_L",
+  "ZN8_TAIL_R",
+  "ZN8_BRAKE_L",
+  "ZN8_BRAKE_R",
+  "ZN8_BRAKE_C",
+  "ZN8_REVERSE_L",
+  "ZN8_REVERSE_R",
+  "ZN8_PLATE",
+]

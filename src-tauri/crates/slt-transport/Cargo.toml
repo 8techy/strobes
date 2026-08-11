@@ -2,7 +2,7 @@
 name = "slt-transport"
 version = "0.1.0"
 edition = "2021"
-description = "HSFZ and DoIP diagnostic transports for BMW ENET connections"
+description = "HSFZ, DoIP, and ISO-TP diagnostic transports"
 
 [dependencies]
 serde = { workspace = true }

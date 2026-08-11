@@ -55,8 +55,9 @@ function ConnectConfirm({
           Ready to connect?
         </h3>
         <p className="mb-1 text-sm leading-relaxed text-[var(--color-ink-300)]">
-          Make sure your ENET cable or Bluetooth adapter is plugged in and
-          linked to the car before you continue.
+          {pending.protocol === "isotp"
+            ? "ISO-TP over CAN is still a research spike. A SocketCAN backend is not wired yet — connect will explain what is missing."
+            : "Make sure your ENET cable or Bluetooth adapter is plugged in and linked to the car before you continue."}
         </p>
         <p className="mb-4 text-sm leading-relaxed text-[var(--color-ink-400)]">
           Ignition on. Target{" "}
@@ -200,10 +201,13 @@ export function Connect() {
             >
               <option value="hsfz">HSFZ (F-Series)</option>
               <option value="doip">DoIP (G-Series)</option>
+              <option value="isotp">ISO-TP (ZN8/BRZ research)</option>
             </select>
             <input
               className="input min-w-0 flex-1"
-              placeholder="169.254.87.130"
+              placeholder={
+                protocol === "isotp" ? "can0 (not wired yet)" : "169.254.87.130"
+              }
               value={host}
               onChange={(e) => setHost(e.target.value)}
             />
