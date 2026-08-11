@@ -4,6 +4,19 @@ A catalog tells Strobes how to turn "switch on the left headlight ring" into
 the exact UDS bytes your car expects. Everything vehicle-specific lives here, so
 adding support for a chassis means writing a TOML file rather than changing code.
 
+## Platforms
+
+| Catalog | Transport | Notes |
+|---------|-----------|-------|
+| `f-series.toml` | HSFZ (BMW ENET) | Template, unverified identifiers |
+| `g-series.toml` | DoIP (BMW ENET) | Template, unverified identifiers |
+| `simulator.toml` | HSFZ | Fully verified against the built-in mock |
+| `zn8.toml` | ISO-TP (CAN) | Research spike for GR86/BRZ (ISO-TP over OBD-II) |
+
+BMW chassis still share one lamp numbering table. ZN8 uses separate `ZN8_*`
+codes; the ISO-TP SocketCAN backend is not wired yet, so connecting with the
+ZN8 catalog will fail until that lands.
+
 ## Why the shipped catalogs are incomplete
 
 The lamp *numbering* is public and already built in: `LAMPNRTEXTE` gives
@@ -40,6 +53,9 @@ If reading the table is not an option, capture instead: HSFZ and DoIP are
 plaintext TCP, so running a lighting `steuern_*` job in Tool32 with Wireshark
 recording the ENET interface shows you the bytes directly.
 
+For ZN8 / ZC8, capture Techstream or SSM5 lighting active tests over OBD-II
+CAN instead, then fill identifiers in `zn8.toml`.
+
 ## Schema
 
 ```toml
@@ -48,7 +64,7 @@ schema_version = 1
 [chassis]
 id = "F3x"                  # short identifier
 name = "BMW F-series"       # shown in the UI
-transport = "hsfz"          # "hsfz" for F-series, "doip" for G-series
+transport = "hsfz"          # "hsfz", "doip", or "isotp"
 notes = ""
 
 [[ecu]]
@@ -77,7 +93,7 @@ verified = false
   max = 100.0
 
 [lamps]
-available = ["TFL_L", "TFL_R"]   # omit or leave empty to offer every lamp
+available = ["TFL_L", "TFL_R"]   # omit or leave empty to offer every BMW lamp
 ```
 
 ### Required action ids

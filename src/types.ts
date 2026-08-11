@@ -5,7 +5,7 @@
  * must be updated alongside the Rust structs.
  */
 
-export type Protocol = "hsfz" | "doip";
+export type Protocol = "hsfz" | "doip" | "isotp";
 
 export interface DiscoveredVehicle {
   ip: string;

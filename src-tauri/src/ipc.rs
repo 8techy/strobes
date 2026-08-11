@@ -250,6 +250,7 @@ pub async fn list_catalogs(state: State<'_, AppState>) -> Result<Vec<CatalogSumm
                 transport: match catalog.chassis.transport {
                     Protocol::Hsfz => "HSFZ".into(),
                     Protocol::DoIp => "DoIP".into(),
+                    Protocol::IsoTp => "ISO-TP".into(),
                 },
                 action_count: catalog.actions.len(),
                 verified: catalog.fully_verified(),
@@ -405,6 +406,12 @@ pub async fn start_simulator(
     state: State<'_, AppState>,
     protocol: Protocol,
 ) -> Result<String, String> {
+    if protocol == Protocol::IsoTp {
+        return Err(
+            "ISO-TP uses the in-process loopback endpoint: connect with host 'loopback' instead of starting the ENET simulator."
+                .into(),
+        );
+    }
     let simulator = slt_sim::Simulator::start(protocol, 0)
         .await
         .map_err(|e| format!("could not start the simulator: {e}"))?;

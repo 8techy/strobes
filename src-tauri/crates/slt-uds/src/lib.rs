@@ -88,7 +88,9 @@ impl SafetyGuard {
             return Err(UdsError::Blocked("empty request".into()));
         };
 
-        if ecu == slt_transport::ecu::DME && !self.allow_powertrain {
+        if (ecu == slt_transport::ecu::DME || ecu == slt_transport::zn8::ECM_REQUEST)
+            && !self.allow_powertrain
+        {
             return Err(UdsError::Blocked(format!(
                 "refusing to address the engine control module at {ecu}"
             )));
@@ -357,10 +359,14 @@ impl UdsClient {
         }
     }
 
-    /// Probes every known lighting-related module.
+    /// Probes every known lighting-related module for the active protocol.
     pub async fn scan_lighting_ecus(&self) -> Vec<EcuScanResult> {
+        let targets: &[(EcuAddress, &str)] = match self.protocol {
+            Protocol::IsoTp => slt_transport::zn8::LIGHTING_SCAN,
+            _ => slt_transport::ecu::LIGHTING_SCAN,
+        };
         let mut results = Vec::new();
-        for (address, label) in slt_transport::ecu::LIGHTING_SCAN {
+        for (address, label) in targets {
             let present = self.probe(*address).await;
             let serial = if present {
                 self.read_string(*address, did::ECU_SERIAL).await.ok()
@@ -379,12 +385,17 @@ impl UdsClient {
         results
     }
 
-    /// Reads the VIN from the gateway, falling back to the body controller.
+    /// Reads the VIN from the gateway / body controller (BMW) or BCM (ZN8).
     pub async fn read_vehicle_info(&self) -> VehicleInfo {
         let protocol = self.protocol.as_str().to_string();
 
+        let candidates: &[EcuAddress] = match self.protocol {
+            Protocol::IsoTp => &[slt_transport::zn8::BCM_REQUEST, slt_transport::zn8::ECM_REQUEST],
+            _ => &[slt_transport::ecu::FEM_GW, slt_transport::ecu::FEM_BODY],
+        };
+
         let mut vin = None;
-        for ecu in [slt_transport::ecu::FEM_GW, slt_transport::ecu::FEM_BODY] {
+        for &ecu in candidates {
             if let Ok(value) = self.read_string(ecu, did::VIN).await {
                 if !value.is_empty() {
                     vin = Some(value);
@@ -393,8 +404,12 @@ impl UdsClient {
             }
         }
 
+        let serial_ecu = match self.protocol {
+            Protocol::IsoTp => slt_transport::zn8::BCM_REQUEST,
+            _ => slt_transport::ecu::FEM_GW,
+        };
         let gateway_serial = self
-            .read_string(slt_transport::ecu::FEM_GW, did::ECU_SERIAL)
+            .read_string(serial_ecu, did::ECU_SERIAL)
             .await
             .ok()
             .filter(|s| !s.is_empty());
@@ -441,6 +456,32 @@ mod tests {
     use super::*;
 
     const FEM: EcuAddress = slt_transport::ecu::FEM_BODY;
+
+    #[tokio::test]
+    async fn isotp_loopback_client_reads_vin_and_scans_bcm() {
+        use std::time::Duration;
+        use slt_transport::{Connection, Protocol};
+
+        let connection = Connection::open(
+            Protocol::IsoTp,
+            "loopback",
+            None,
+            Duration::from_millis(500),
+        )
+        .await
+        .unwrap();
+        let client = UdsClient::new(connection);
+        let info = client.read_vehicle_info().await;
+        assert_eq!(info.protocol, "ISO-TP");
+        assert!(info.vin.as_deref().unwrap_or("").starts_with("JF1ZN"));
+
+        let scan = client.scan_lighting_ecus().await;
+        let bcm = scan
+            .iter()
+            .find(|r| r.address == slt_transport::zn8::BCM_REQUEST.0)
+            .expect("BCM in scan");
+        assert!(bcm.present);
+    }
 
     #[test]
     fn positive_response_strips_the_service_echo() {

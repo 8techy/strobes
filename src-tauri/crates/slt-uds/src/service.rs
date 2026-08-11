@@ -19,6 +19,8 @@ pub mod sid {
     pub const DYNAMICALLY_DEFINE_DATA_IDENTIFIER: u8 = 0x2C;
     /// WriteDataByIdentifier. EDIABAS `STEUERN`. Blocked by the safety guard.
     pub const WRITE_DATA_BY_IDENTIFIER: u8 = 0x2E;
+    /// SecurityAccess. Required by some non-BMW body modules before actuation.
+    pub const SECURITY_ACCESS: u8 = 0x27;
     /// InputOutputControlByIdentifier. EDIABAS `STEUERN_IO`. The actuation path.
     pub const IO_CONTROL_BY_IDENTIFIER: u8 = 0x2F;
     /// RoutineControl. EDIABAS `STEUERN_ROUTINE`.

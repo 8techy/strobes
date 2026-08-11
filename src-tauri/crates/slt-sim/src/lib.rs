@@ -84,6 +84,12 @@ impl Simulator {
                             let result = match protocol {
                                 Protocol::Hsfz => serve_hsfz(stream, ecus).await,
                                 Protocol::DoIp => serve_doip(stream, ecus).await,
+                                Protocol::IsoTp => {
+                                    Err(std::io::Error::new(
+                                        std::io::ErrorKind::Unsupported,
+                                        "simulator has no ISO-TP listener yet",
+                                    ))
+                                }
                             };
                             if let Err(e) = result {
                                 tracing::debug!(error = %e, "simulator session ended");
@@ -290,7 +296,7 @@ mod tests {
     #[tokio::test]
     async fn hsfz_client_reads_vin_through_real_framing() {
         let sim = Simulator::start(Protocol::Hsfz, 0).await.unwrap();
-        let connection = Connection::open(Protocol::Hsfz, sim.ip(), Some(sim.port()), TIMEOUT)
+        let connection = Connection::open_ip(Protocol::Hsfz, sim.ip(), Some(sim.port()), TIMEOUT)
             .await
             .unwrap();
         let client = slt_uds::UdsClient::new(connection);
@@ -305,7 +311,7 @@ mod tests {
     #[tokio::test]
     async fn doip_client_reads_vin_after_routing_activation() {
         let sim = Simulator::start(Protocol::DoIp, 0).await.unwrap();
-        let connection = Connection::open(Protocol::DoIp, sim.ip(), Some(sim.port()), TIMEOUT)
+        let connection = Connection::open_ip(Protocol::DoIp, sim.ip(), Some(sim.port()), TIMEOUT)
             .await
             .unwrap();
         let client = slt_uds::UdsClient::new(connection);
@@ -320,7 +326,7 @@ mod tests {
     #[tokio::test]
     async fn absent_ecu_surfaces_a_gateway_rejection() {
         let sim = Simulator::start(Protocol::Hsfz, 0).await.unwrap();
-        let connection = Connection::open(Protocol::Hsfz, sim.ip(), Some(sim.port()), TIMEOUT)
+        let connection = Connection::open_ip(Protocol::Hsfz, sim.ip(), Some(sim.port()), TIMEOUT)
             .await
             .unwrap();
         let client = slt_uds::UdsClient::new(connection);
@@ -332,7 +338,7 @@ mod tests {
     #[tokio::test]
     async fn scan_finds_the_seeded_modules() {
         let sim = Simulator::start(Protocol::Hsfz, 0).await.unwrap();
-        let connection = Connection::open(Protocol::Hsfz, sim.ip(), Some(sim.port()), TIMEOUT)
+        let connection = Connection::open_ip(Protocol::Hsfz, sim.ip(), Some(sim.port()), TIMEOUT)
             .await
             .unwrap();
         let client = slt_uds::UdsClient::new(connection);
@@ -352,7 +358,7 @@ mod tests {
             guard.get_mut(&0x40).unwrap().pending_responses = 3;
         }
         let sim = Simulator::start_with(Protocol::Hsfz, 0, ecus).await.unwrap();
-        let connection = Connection::open(Protocol::Hsfz, sim.ip(), Some(sim.port()), TIMEOUT)
+        let connection = Connection::open_ip(Protocol::Hsfz, sim.ip(), Some(sim.port()), TIMEOUT)
             .await
             .unwrap();
         let client = slt_uds::UdsClient::new(connection);
@@ -369,7 +375,7 @@ mod tests {
     #[tokio::test]
     async fn actuation_and_release_move_simulated_lamp_state() {
         let sim = Simulator::start(Protocol::Hsfz, 0).await.unwrap();
-        let connection = Connection::open(Protocol::Hsfz, sim.ip(), Some(sim.port()), TIMEOUT)
+        let connection = Connection::open_ip(Protocol::Hsfz, sim.ip(), Some(sim.port()), TIMEOUT)
             .await
             .unwrap();
         let client = slt_uds::UdsClient::new(connection);
@@ -409,7 +415,7 @@ mod tests {
     #[tokio::test]
     async fn guard_blocks_a_programming_session_before_it_reaches_the_wire() {
         let sim = Simulator::start(Protocol::Hsfz, 0).await.unwrap();
-        let connection = Connection::open(Protocol::Hsfz, sim.ip(), Some(sim.port()), TIMEOUT)
+        let connection = Connection::open_ip(Protocol::Hsfz, sim.ip(), Some(sim.port()), TIMEOUT)
             .await
             .unwrap();
         let client = slt_uds::UdsClient::new(connection);
@@ -429,7 +435,7 @@ mod tests {
             guard.get_mut(&0x40).unwrap().add_dtc(0x8040B8, 0x08);
         }
         let sim = Simulator::start_with(Protocol::Hsfz, 0, ecus).await.unwrap();
-        let connection = Connection::open(Protocol::Hsfz, sim.ip(), Some(sim.port()), TIMEOUT)
+        let connection = Connection::open_ip(Protocol::Hsfz, sim.ip(), Some(sim.port()), TIMEOUT)
             .await
             .unwrap();
         let client = slt_uds::UdsClient::new(connection);

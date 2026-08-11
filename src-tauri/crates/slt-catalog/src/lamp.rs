@@ -1,9 +1,12 @@
-//! The BMW lamp index enumeration.
+//! The lamp index enumeration.
 //!
-//! Transcribed from the `LAMPNRTEXTE` / `TAB_AUSGANG_LEUCHTEN` table published
-//! by the BMW community. The same numbering is shared across `FEM_20`, `BDC`,
-//! `BDC_G05` and `BDC_G11`, which is what lets one table serve both F and G
-//! series. See `docs/protocol-research.md` section 3.
+//! BMW entries are transcribed from the `LAMPNRTEXTE` /
+//! `TAB_AUSGANG_LEUCHTEN` table published by the BMW community. The same
+//! numbering is shared across `FEM_20`, `BDC`, `BDC_G05` and `BDC_G11`. See
+//! `docs/protocol-research.md` section 3.
+//!
+//! `ZN8_*` entries are a research placeholder set for Toyota GR86 / Subaru BRZ.
+//! Their ids are local UI indices, not OEM output numbers.
 //!
 //! This is an index of *outputs*, not a set of commands: knowing that
 //! `TMS_LEUCHTRING_L` is `0x30` says nothing about how to switch it on. That
@@ -129,6 +132,29 @@ lamps![
     (0x42, "SPECIAL_FUNCTION_1_LED", "Special function LED", Indicator2, false, true),
     (0x43, "MSA_LED", "Start/stop LED", Indicator2, false, true),
     (0x44, "SST_LED", "Sport mode LED", Indicator2, false, true),
+
+    // ZN8 / ZC8 research lamps. IDs live above the BMW LAMPNR range so they
+    // never collide. Local numbering for the UI only — not OEM output IDs.
+    (0x80, "ZN8_DRL_L", "GR86/BRZ DRL, left", Headlight, false, true),
+    (0x81, "ZN8_DRL_R", "GR86/BRZ DRL, right", Headlight, false, true),
+    (0x82, "ZN8_LOW_L", "GR86/BRZ low beam, left", Headlight, false, true),
+    (0x83, "ZN8_LOW_R", "GR86/BRZ low beam, right", Headlight, false, true),
+    (0x84, "ZN8_HIGH_L", "GR86/BRZ high beam, left", Headlight, false, true),
+    (0x85, "ZN8_HIGH_R", "GR86/BRZ high beam, right", Headlight, false, true),
+    (0x86, "ZN8_PARK_L", "GR86/BRZ parking lamp, left", Headlight, false, true),
+    (0x87, "ZN8_PARK_R", "GR86/BRZ parking lamp, right", Headlight, false, true),
+    (0x88, "ZN8_TURN_F_L", "GR86/BRZ front turn, left", Indicator, true, false),
+    (0x89, "ZN8_TURN_F_R", "GR86/BRZ front turn, right", Indicator, true, false),
+    (0x8A, "ZN8_TURN_R_L", "GR86/BRZ rear turn, left", Indicator, true, false),
+    (0x8B, "ZN8_TURN_R_R", "GR86/BRZ rear turn, right", Indicator, true, false),
+    (0x8C, "ZN8_TAIL_L", "GR86/BRZ taillight, left", Rear, false, true),
+    (0x8D, "ZN8_TAIL_R", "GR86/BRZ taillight, right", Rear, false, true),
+    (0x8E, "ZN8_BRAKE_L", "GR86/BRZ brake, left", Rear, true, false),
+    (0x8F, "ZN8_BRAKE_R", "GR86/BRZ brake, right", Rear, true, false),
+    (0x90, "ZN8_BRAKE_C", "GR86/BRZ center brake", Rear, true, false),
+    (0x91, "ZN8_REVERSE_L", "GR86/BRZ reverse, left", Rear, true, false),
+    (0x92, "ZN8_REVERSE_R", "GR86/BRZ reverse, right", Rear, true, false),
+    (0x93, "ZN8_PLATE", "GR86/BRZ license plate", Rear, false, true),
 ];
 
 /// Applies an operation to every lamp the module supports.
@@ -223,6 +249,13 @@ mod tests {
         for code in ["TFL_L", "TMS_LEUCHTRING_L", "TMS_DESIGN_R", "POL_L", "SL_L", "NSW_L"] {
             assert!(by_code(code).unwrap().featured, "{code} should be featured");
         }
+    }
+
+    #[test]
+    fn zn8_research_lamps_resolve() {
+        assert_eq!(by_code("ZN8_DRL_L").unwrap().id, 0x80);
+        assert!(by_code("ZN8_BRAKE_C").unwrap().safety_critical);
+        assert!(by_code("ZN8_DRL_R").unwrap().featured);
     }
 
     #[test]

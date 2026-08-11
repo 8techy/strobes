@@ -55,8 +55,9 @@ function ConnectConfirm({
           Ready to connect?
         </h3>
         <p className="mb-1 text-sm leading-relaxed text-[var(--color-ink-300)]">
-          Make sure your ENET cable or Bluetooth adapter is plugged in and
-          linked to the car before you continue.
+          {pending.protocol === "isotp"
+            ? "ISO-TP: use host “loopback” to talk to the in-process mock BCM, or a CAN interface name once SocketCAN is wired."
+            : "Make sure your ENET cable or Bluetooth adapter is plugged in and linked to the car before you continue."}
         </p>
         <p className="mb-4 text-sm leading-relaxed text-[var(--color-ink-400)]">
           Ignition on. Target{" "}
@@ -98,6 +99,16 @@ export function Connect() {
   useEffect(() => {
     void loadCatalogs();
   }, [loadCatalogs]);
+
+  useEffect(() => {
+    if (protocol === "isotp") {
+      setHost((current) =>
+        current === "" || /^\d{1,3}(\.\d{1,3}){3}$/.test(current)
+          ? "loopback"
+          : current,
+      );
+    }
+  }, [protocol]);
 
   async function discover() {
     setScanning(true);
@@ -200,10 +211,13 @@ export function Connect() {
             >
               <option value="hsfz">HSFZ (F-Series)</option>
               <option value="doip">DoIP (G-Series)</option>
+              <option value="isotp">ISO-TP (ZN8/BRZ research)</option>
             </select>
             <input
               className="input min-w-0 flex-1"
-              placeholder="169.254.87.130"
+              placeholder={
+                protocol === "isotp" ? "loopback" : "169.254.87.130"
+              }
               value={host}
               onChange={(e) => setHost(e.target.value)}
             />

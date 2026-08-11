@@ -139,10 +139,7 @@ pub async fn connect(
     host: &str,
     port: Option<u16>,
 ) -> Result<UdsClient, String> {
-    let ip = host
-        .parse()
-        .map_err(|_| format!("'{host}' is not a valid IP address"))?;
-    let connection = Connection::open(protocol, ip, port, REQUEST_TIMEOUT)
+    let connection = Connection::open(protocol, host, port, REQUEST_TIMEOUT)
         .await
         .map_err(|e| e.to_string())?;
     Ok(UdsClient::new(connection))

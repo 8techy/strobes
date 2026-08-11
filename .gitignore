@@ -1,4 +1,6 @@
 docs/
+*-research.md
+**/*-research.md
 node_modules/
 
 # Tests

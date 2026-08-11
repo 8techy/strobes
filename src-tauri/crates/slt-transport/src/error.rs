@@ -37,6 +37,10 @@ pub enum TransportError {
 
     #[error("response arrived from ECU 0x{actual:04X} but 0x{expected:04X} was addressed")]
     UnexpectedResponder { expected: u16, actual: u16 },
+
+    /// ISO-TP over SocketCAN (or another CAN backend) is scaffolded but not wired.
+    #[error("ISO-TP transport is not connected to a CAN adapter yet: {0}")]
+    IsoTpNotImplemented(&'static str),
 }
 
 /// HSFZ control words that indicate the gateway refused the request.
