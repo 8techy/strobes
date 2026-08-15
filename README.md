@@ -5,7 +5,7 @@ React UI (Vite + Tailwind)</br>
 Tauri IPC</br>
 Rust command scheduling (for timed activation)</br>
 HSFZ and DoIP BMW protocols</br>
-ZN8 / BRZ ISO-TP research spike</br>
+
 
 <img width="639" height="339" alt="image" src="https://github.com/user-attachments/assets/2a246599-c1f1-462b-b035-a065650d5114" />
 
